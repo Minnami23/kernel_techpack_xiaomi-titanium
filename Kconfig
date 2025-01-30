@@ -1,2 +1,3 @@
 source "techpack/xiaomi-titanium/touchscreen/Kconfig"
 source "techpack/xiaomi-titanium/ir/Kconfig"
+source "techpack/xiaomi-titanium/leds/Kconfig"
