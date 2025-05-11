@@ -1,0 +1,1 @@
+obj-$(CONFIG_SPI_PEELIR) += peelir.o

@@ -1,0 +1,5 @@
+config SPI_PEELIR
+	tristate "PEELIR"
+
+	---help---
+	   Enable this option if you use peelir.
