@@ -42,7 +42,7 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 
-#include <synaptics_dsx_lansi.h>
+#include "synaptics_dsx_lansi.h"
 #include "synaptics_dsx_core.h"
 #include <linux/delay.h>
 #include <linux/workqueue.h>

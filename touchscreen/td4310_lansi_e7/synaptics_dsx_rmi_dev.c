@@ -45,7 +45,7 @@
 #include <linux/cdev.h>
 #include <linux/platform_device.h>
 
-#include <synaptics_dsx.h>
+#include "synaptics_dsx_lansi.h"
 #include "synaptics_dsx_core.h"
 
 #define CHAR_DEVICE_NAME "rmi"

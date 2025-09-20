@@ -41,7 +41,7 @@
 #include <linux/firmware.h>
 #include <linux/platform_device.h>
 
-#include <synaptics_dsx.h>
+#include "synaptics_dsx_lansi.h"
 #include "synaptics_dsx_core.h"
 #include <linux/proc_fs.h>
 
