@@ -20,7 +20,7 @@
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/regulator/consumer.h>
-#include <leds-aw2013-mi8953.h>
+#include <xiaomi-titanium/leds-aw2013-mi8953.h>
 
 /* register address */
 #define AW_REG_RESET			0x00

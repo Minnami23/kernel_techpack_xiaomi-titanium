@@ -42,7 +42,7 @@
 #include <linux/of_gpio.h>
 #include <linux/platform_device.h>
 
-#include <synaptics_dsx.h>
+#include <xiaomi-titanium/synaptics_dsx_lansi.h>
 #include "synaptics_dsx_core.h"
 
 #define SYN_I2C_RETRY_TIMES 10

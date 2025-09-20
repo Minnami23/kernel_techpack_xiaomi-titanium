@@ -21,7 +21,7 @@
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/regulator/consumer.h>
-#include <leds-aw2023-mi8953.h>
+#include <xiaomi-titanium/leds-aw2023-mi8953.h>
 
 /* register address */
 #define AW2023_REG_RESET				0x00
