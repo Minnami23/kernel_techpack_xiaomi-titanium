@@ -35,6 +35,9 @@
 #ifndef _SYNAPTICS_DSX_LANSI_H_
 #define _SYNAPTICS_DSX_LANSI_H_
 
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_TD4310_LANSI_E7)
+#include <linux/device.h>
+
 #define PLATFORM_DRIVER_NAME "lansi_dsx_v21"
 #define STYLUS_DRIVER_NAME "synaptics_dsx_stylus_lansi"
 #define ACTIVE_PEN_DRIVER_NAME "synaptics_dsx_active_pen"
@@ -112,5 +115,5 @@ struct synaptics_dsx_board_data {
 	struct synaptics_dsx_button_map *cap_button_map;
 	struct synaptics_dsx_button_map *vir_button_map;
 };
-
+#endif
 #endif

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2019 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -11,9 +12,10 @@
  * GNU General Public License for more details.
  *
  */
-
-#ifndef _LEDS_AW2013_H_
-#define _LEDS_AW2013_H_
+#ifndef _LEDS_AW2023_H_
+#define _LEDS_AW2023_H_
+#if IS_ENABLED(CONFIG_LEDS_AW2023_MI8953)
+#include <linux/device.h>
 
 /* The definition of each time described as shown in figure.
  *        /-----------\
@@ -25,14 +27,15 @@
  * rise_time_ms  fall_time_ms |
  *                       off_time_ms
  */
-
-struct aw2013_platform_data {
-	int max_current;
+struct aw2023_platform_data {
+	int imax;
+	int led_current;
 	int rise_time_ms;
 	int hold_time_ms;
 	int fall_time_ms;
 	int off_time_ms;
-	struct aw2013_led *led;
+	struct aw2023_led *led;
 };
 
+#endif
 #endif
