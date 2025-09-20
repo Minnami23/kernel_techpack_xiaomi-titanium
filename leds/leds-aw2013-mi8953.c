@@ -21,7 +21,7 @@
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/regulator/consumer.h>
-#include <xiaomi-titanium/leds-aw2013.h>
+#include <xiaomi-titanium/leds_aw2013.h>
 
 /* register address */
 #define AW_REG_RESET			0x00
