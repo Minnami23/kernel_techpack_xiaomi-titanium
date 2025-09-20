@@ -4,7 +4,7 @@ source "techpack/xiaomi-titanium/touchscreen/td4310_lansi_e7/Kconfig"
 
 config TOUCHSCREEN_NT36672
 	bool "Novatek NT36672"
-	default y
+	default n
 	help
 	  Say Y here if you have a Novatek NT36672 touchscreen connected
 	  to your system.
