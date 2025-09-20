@@ -1,8 +1,3 @@
-config TOUCHSCREEN_SYSCTL_MI8953
- 	bool "Sysctl control interface for Xiaomi MSM8953 touchscreens"
- 	help
- 	  Say Y here to enable sysctl control interface for Xiaomi MSM8953 touchscreens
-
 source "techpack/xiaomi-titanium/touchscreen/focaltech_touch/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/td4310_e7/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/td4310_lansi_e7/Kconfig"

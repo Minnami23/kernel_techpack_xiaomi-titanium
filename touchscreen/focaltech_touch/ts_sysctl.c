@@ -4,7 +4,7 @@
 #if IS_ENABLED(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
 #include <linux/input/doubletap2wake.h>
 #endif
-#include <xiaomi-titanium/touchscreen.h>
+#include "touchscreen.h"
 
 struct xiaomi_msm8953_touchscreen_operations_t *xiaomi_msm8953_touchscreen_operations;
 
