@@ -6,3 +6,4 @@ obj-$(CONFIG_TOUCHSCREEN_FTS_MI8953) += focaltech_touch/
 obj-$(CONFIG_TOUCHSCREEN_FT5446_E6) += ft5446_e6/
 obj-$(CONFIG_TOUCHSCREEN_GT9XX) += gt9xx/
 obj-$(CONFIG_MACH_XIAOMI_YSL)		+= lct_tp_fm_info_e6.o
+obj-$(CONFIG_TOUCHSCREEN_SYSCTL_MI8953) += ts_sysctl.o

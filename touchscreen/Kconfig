@@ -48,3 +48,9 @@ config TOUCHSCREEN_TD4310_LANSI_E7
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called ist3038c_ts.
+
+config TOUCHSCREEN_SYSCTL_MI8953
+ 	bool "Sysctl control interface for Xiaomi MSM8953 touchscreens"
+ 	help
+ 	  Say Y here to enable sysctl control interface for Xiaomi MSM8953 touchscreens
+

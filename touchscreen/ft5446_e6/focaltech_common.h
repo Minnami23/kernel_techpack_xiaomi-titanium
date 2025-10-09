@@ -112,6 +112,9 @@ int fts_i2c_init(void);
 int fts_i2c_exit(void);
 
 /* Gesture functions */
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_SYSCTL_MI8953)
+int fts_mi8953_ops_enable_dt2w(struct device *dev, bool enable);
+#endif
 #if FTS_GESTURE_EN
 int fts_gesture_init(struct input_dev *input_dev, struct i2c_client *client);
 int fts_gesture_exit(struct i2c_client *client);

@@ -203,6 +203,7 @@ int fts_sensor_suspend(struct fts_ts_data *data);
 int fts_sensor_resume(struct fts_ts_data *data);
 int fts_sensor_remove(struct fts_ts_data *data);
 #endif
+extern bool gesture_incall;
 
 /*****************************************************************************
 * Static variables

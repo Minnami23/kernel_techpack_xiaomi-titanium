@@ -33,6 +33,7 @@
 * Included header files
 *****************************************************************************/
 #include "focaltech_core.h"
+#include "touchscreen.h"
 #include "../lct_tp_fm_info_e6.h"
 
 
@@ -42,6 +43,15 @@
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 #include <linux/earlysuspend.h>
 #define FTS_SUSPEND_LEVEL 1     /* Early-suspend level */
+#endif
+
+#if (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && !defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+#include <linux/input/doubletap2wake.h>
+#elif (defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) && !defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE))
+#include <linux/input/sweep2wake.h>
+#elif (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+#include <linux/input/doubletap2wake.h>
+#include <linux/input/sweep2wake.h>
 #endif
 
 /*****************************************************************************
@@ -1181,6 +1191,10 @@ static void fts_ts_late_resume(struct early_suspend *handler)
 }
 #endif
 
+static struct xiaomi_msm8953_touchscreen_operations_t fts_mi8953_ts_ops = {
+ 	.enable_dt2w = fts_mi8953_ops_enable_dt2w,
+};
+
 static int fts_ts_pinctrl_init(struct fts_ts_data *fts_data)
 {
 	int retval;
@@ -1252,7 +1266,6 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 #ifdef SUPPORT_READ_TP_VERSION
 	char fw_version[64];
 #endif
-
 
 	if(1 == lct_tp_register_flag) {
 		lct_tp_register_flag = 0;
@@ -1417,6 +1430,11 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	fts_esdcheck_init();
 	#endif
 
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_SYSCTL_MI8953)
+ 	fts_mi8953_ts_ops.dev = ts_data->dev;
+ 	xiaomi_msm8953_touchscreen_register_operations(&fts_mi8953_ts_ops);
+#endif
+
 	fts_irq_enable();
 
 	#if FTS_AUTO_UPGRADE_EN
@@ -1564,6 +1582,23 @@ static int fts_ts_remove(struct i2c_client *client)
 	return 0;
 }
 
+static bool ev_btn_status = false;
+static bool fts_ts_irq_active = false;
+static void fts_ts_irq_handler(int irq, bool active)
+{
+ 	if (active) {
+ 		if (!fts_ts_irq_active) {
+ 			enable_irq_wake(irq);
+ 			fts_ts_irq_active = true;
+ 		}
+ 	} else {
+ 		if (fts_ts_irq_active) {
+ 			disable_irq_wake(irq);
+ 			fts_ts_irq_active = false;
+ 		}
+ 	}
+}
+
 /*****************************************************************************
 *  Name: fts_ts_suspend
 *  Brief:
@@ -1575,6 +1610,7 @@ static int fts_ts_suspend(struct device *dev)
 {
 	struct fts_ts_data *data = dev_get_drvdata(dev);
 	int retval = 0;
+	int i = 0;
 
 	FTS_FUNC_ENTER();
 	if (data->suspended)
@@ -1634,6 +1670,29 @@ static int fts_ts_suspend(struct device *dev)
 	return 0;
 }
 
+#if (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && !defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+	if (dt2w_switch > 0 && !gesture_incall) {
+#elif (defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) && !defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE))
+	if (s2w_switch == 1 && !gesture_incall) {
+#elif (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+	if ((dt2w_switch > 0 || s2w_switch == 1) &&
+		!gesture_incall) {
+#endif
+		if (!ev_btn_status) {
+			/* release all touches */
+			for (i = 0; i < ts_data->pdata->max_touch_number; i++) {
+				input_mt_slot(ts_data->input_dev, i);
+				input_mt_report_slot_state(ts_data->input_dev, MT_TOOL_FINGER, 0);
+			}
+			input_mt_report_pointer_emulation(ts_data->input_dev, false);
+			__clear_bit(BTN_TOUCH, ts_data->input_dev->keybit);
+			input_sync(ts_data->input_dev);
+			ev_btn_status = true;
+		}
+		fts_ts_irq_handler(ts_data->client->irq, true);
+		return 0;
+	}
+
 
 /*******************************************************
  * do_fts_resume_work
@@ -1667,6 +1726,21 @@ static int fts_ts_resume(struct device *dev)
 		FTS_DEBUG("Already in awake state");
 		FTS_FUNC_EXIT();
 		return -1;
+	}
+
+#if (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && !defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+	if (dt2w_switch > 0) {
+#elif (defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) && !defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE))
+	if (s2w_switch == 1) {
+#elif (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+	if (dt2w_switch > 0 || s2w_switch == 1) {
+#endif
+		if (ev_btn_status) {
+			__set_bit(BTN_TOUCH, ts_data->input_dev->keybit);
+			input_sync(ts_data->input_dev);
+			ev_btn_status = false;
+		}
+		fts_ts_irq_handler(ts_data->client->irq, false);
 	}
 
 	/*if (data->ts_pinctrl) {
