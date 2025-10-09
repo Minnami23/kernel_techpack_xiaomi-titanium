@@ -1,4 +1,5 @@
 source "techpack/xiaomi-titanium/touchscreen/focaltech_touch/Kconfig"
+source "techpack/xiaomi-titanium/touchscreen/ft5446_e6/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/td4310_e7/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/td4310_lansi_e7/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/gt9xx/Kconfig"
