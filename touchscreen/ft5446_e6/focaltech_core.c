@@ -1191,22 +1191,6 @@ static void fts_ts_late_resume(struct early_suspend *handler)
 }
 #endif
 
-#if IS_ENABLED(CONFIG_TOUCHSCREEN_SYSCTL_MI8953)
-static int fts_mi8953_ops_disable_keys(struct device *dev, bool disable)
-{
- 	struct fts_ts_data *data = fts_data;
- 
- 	if (disable) {
- 		FTS_DEBUG("disable keys");
- 		ts_data->disable_keys = true;
- 	} else {
- 		FTS_DEBUG("enable keys");
- 		ts_data->disable_keys = false;
- 	}
- 
- 	return 0;
-}
-
 static struct xiaomi_msm8953_touchscreen_operations_t fts_mi8953_ts_ops = {
  	.enable_dt2w = fts_mi8953_ops_enable_dt2w,
 };
