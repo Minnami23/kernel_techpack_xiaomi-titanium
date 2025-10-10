@@ -111,7 +111,7 @@ static struct fts_gesture_st fts_gesture_data;
 int fts_mi8953_ops_enable_dt2w(struct device *dev, bool enable)
 {
  
- 	mutex_lock(&fts_input_dev->input_dev->mutex);
+ 	mutex_lock(&fts_input_dev->mutex);
  	if (enable) {
  		FTS_DEBUG("enable gesture");
  		fts_gesture_data.mode = ENABLE;
