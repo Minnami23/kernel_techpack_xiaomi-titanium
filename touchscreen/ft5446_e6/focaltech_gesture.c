@@ -110,17 +110,16 @@ static struct fts_gesture_st fts_gesture_data;
 #if IS_ENABLED(CONFIG_TOUCHSCREEN_SYSCTL_MI8953)
 int fts_mi8953_ops_enable_dt2w(struct device *dev, bool enable)
 {
- 	struct fts_ts_data *data = fts_data;
  
- 	mutex_lock(&data->input_dev->mutex);
+ 	mutex_lock(&fts_input_dev->input_dev->mutex);
  	if (enable) {
  		FTS_DEBUG("enable gesture");
- 		data->gesture_mode = ENABLE;
+ 		fts_gesture_data.mode = ENABLE;
  	} else {
  		FTS_DEBUG("disable gesture");
- 		data->gesture_mode = DISABLE;
+ 		fts_gesture_data.mode = DISABLE;
  	}
- 	mutex_unlock(&data->input_dev->mutex);
+	mutex_unlock(&fts_input_dev->mutex);
  
  	return 0;
 }
