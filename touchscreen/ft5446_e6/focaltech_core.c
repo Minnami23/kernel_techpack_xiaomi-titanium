@@ -1431,7 +1431,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	#endif
 
 #if IS_ENABLED(CONFIG_TOUCHSCREEN_SYSCTL_MI8953)
- 	fts_mi8953_ts_ops.dev = ts_data->dev;
+ 	fts_mi8953_ts_ops.dev = data->dev;
  	xiaomi_msm8953_touchscreen_register_operations(&fts_mi8953_ts_ops);
 #endif
 
@@ -1624,6 +1624,29 @@ static int fts_ts_suspend(struct device *dev)
 	fts_esdcheck_suspend();
 	#endif
 
+#if (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && !defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+	if (dt2w_switch > 0 && !gesture_incall) {
+#elif (defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) && !defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE))
+	if (s2w_switch == 1 && !gesture_incall) {
+#elif (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+	if ((dt2w_switch > 0 || s2w_switch == 1) &&
+			!gesture_incall) {
+#endif
+		if (!ev_btn_status) {
+			/* release all touches */
+			for (i = 0; i < data->pdata->max_touch_number; i++) {
+				input_mt_slot(data->input_dev, i);
+				input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, 0);
+			}
+			input_mt_report_pointer_emulation(data->input_dev, false);
+			//__clear_bit(BTN_TOUCH, ts_data->input_dev->keybit);
+			input_sync(data->input_dev);
+			ev_btn_status = true;
+		}
+		fts_ts_irq_handler(data->client->irq, true);
+		return 0;
+	}
+
 	#if FTS_GESTURE_EN
 	retval = fts_gesture_suspend(data->client);
 	if (retval == 0)
@@ -1670,30 +1693,6 @@ static int fts_ts_suspend(struct device *dev)
 	return 0;
 }
 
-#if (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && !defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
-	if (dt2w_switch > 0 && !gesture_incall) {
-#elif (defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) && !defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE))
-	if (s2w_switch == 1 && !gesture_incall) {
-#elif (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) && defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
-	if ((dt2w_switch > 0 || s2w_switch == 1) &&
-		!gesture_incall) {
-#endif
-		if (!ev_btn_status) {
-			/* release all touches */
-			for (i = 0; i < ts_data->pdata->max_touch_number; i++) {
-				input_mt_slot(ts_data->input_dev, i);
-				input_mt_report_slot_state(ts_data->input_dev, MT_TOOL_FINGER, 0);
-			}
-			input_mt_report_pointer_emulation(ts_data->input_dev, false);
-			__clear_bit(BTN_TOUCH, ts_data->input_dev->keybit);
-			input_sync(ts_data->input_dev);
-			ev_btn_status = true;
-		}
-		fts_ts_irq_handler(ts_data->client->irq, true);
-		return 0;
-	}
-
-
 /*******************************************************
  * do_fts_resume_work
  *******************************************************/
@@ -1736,11 +1735,11 @@ static int fts_ts_resume(struct device *dev)
 	if (dt2w_switch > 0 || s2w_switch == 1) {
 #endif
 		if (ev_btn_status) {
-			__set_bit(BTN_TOUCH, ts_data->input_dev->keybit);
-			input_sync(ts_data->input_dev);
+			__set_bit(BTN_TOUCH, data->input_dev->keybit);
+			input_sync(data->input_dev);
 			ev_btn_status = false;
 		}
-		fts_ts_irq_handler(ts_data->client->irq, false);
+		fts_ts_irq_handler(data->client->irq, false);
 	}
 
 	/*if (data->ts_pinctrl) {
