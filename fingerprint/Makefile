@@ -1,0 +1,4 @@
+obj-$(CONFIG_FINGERPRINT_FPC1020) += fpc/
+obj-$(CONFIG_FINGERPRINT_GOODIX_GF3208) += goodix/
+obj-$(CONFIG_FINGERPRINT_FPC) += fpc_ysl/
+obj-$(CONFIG_GOODIX_FINGERPRINT) += goodix_ysl/
