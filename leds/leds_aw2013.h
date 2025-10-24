@@ -12,10 +12,8 @@
  *
  */
 
-#ifndef _LEDS_AW2013_H_
-#define _LEDS_AW2013_H_
-#if IS_ENABLED(CONFIG_LEDS_AW2013_MI8953)
-#include <linux/device.h>
+#ifndef __LINUX_AW2013_LED_H__
+#define __LINUX_AW2013_LED_H__
 
 /* The definition of each time described as shown in figure.
  *        /-----------\
@@ -37,5 +35,4 @@ struct aw2013_platform_data {
 	struct aw2013_led *led;
 };
 
-#endif
 #endif

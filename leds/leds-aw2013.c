@@ -13,7 +13,6 @@
  */
 
 #include <linux/delay.h>
-#include <linux/device.h>
 #include <linux/i2c.h>
 #include <linux/init.h>
 #include <linux/leds.h>
@@ -56,7 +55,7 @@ struct aw2013_led {
 	struct i2c_client *client;
 	struct led_classdev cdev;
 	struct aw2013_platform_data *pdata;
-
+	struct work_struct brightness_work;
 	struct mutex lock;
 	struct regulator *vdd;
 	struct regulator *vcc;
@@ -100,6 +99,7 @@ static int aw2013_power_on(struct aw2013_led *led, bool on)
 				"Regulator vcc enable failed rc=%d\n", rc);
 			goto fail_enable_reg;
 		}
+		msleep(100);
 		led->poweron = true;
 	} else {
 		rc = regulator_disable(led->vdd);
@@ -199,7 +199,7 @@ reg_vdd_put:
 	regulator_put(led->vdd);
 	return rc;
 }
-#if 0
+
 static void aw2013_brightness_work(struct work_struct *work)
 {
 	struct aw2013_led *led = container_of(work, struct aw2013_led,
@@ -249,47 +249,7 @@ static void aw2013_brightness_work(struct work_struct *work)
 
 	mutex_unlock(&led->pdata->led->lock);
 }
-#else
-static void aw2013_brightness_set(struct aw2013_led *led)
-{
-	u8 val;
 
-	if (!led->pdata->led->poweron) {
-		if (aw2013_power_on(led->pdata->led, true)) {
-			dev_err(&led->pdata->led->client->dev, "power on failed");
-			mutex_unlock(&led->pdata->led->lock);
-			return;
-		}
-	}
-	pr_err("aw2013----brightness = %d    led_id = %d\n",led->cdev.brightness ,led->id);
-	if (led->cdev.brightness > 0) {
-		if (led->cdev.brightness > led->cdev.max_brightness)
-			led->cdev.brightness = led->cdev.max_brightness;
-		aw2013_write(led, AW_REG_GLOBAL_CONTROL,
-			AW_LED_MOUDLE_ENABLE_MASK);
-		aw2013_write(led, AW_REG_LED_CONFIG_BASE + led->id,
-			led->pdata->max_current);
-		aw2013_write(led, AW_REG_LED_BRIGHTNESS_BASE + led->id,
-			led->cdev.brightness);
-		aw2013_read(led, AW_REG_LED_ENABLE, &val);
-		aw2013_write(led, AW_REG_LED_ENABLE, val | (1 << led->id));
-	} else {
-		aw2013_read(led, AW_REG_LED_ENABLE, &val);
-		aw2013_write(led, AW_REG_LED_ENABLE, val & (~(1 << led->id)));
-	}
-
-	aw2013_read(led, AW_REG_LED_ENABLE, &val);
-
-	if (val == 0) {
-		if (aw2013_power_on(led->pdata->led, false)) {
-			dev_err(&led->pdata->led->client->dev,
-				"power off failed");
-			return;
-		}
-	}
-}
-
-#endif
 static void aw2013_led_blink_set(struct aw2013_led *led, unsigned long blinking)
 {
 	u8 val;
@@ -304,7 +264,6 @@ static void aw2013_led_blink_set(struct aw2013_led *led, unsigned long blinking)
 
 	led->cdev.brightness = blinking ? led->cdev.max_brightness : 0;
 
-	pr_err("aw2013----blink = %d    led_id = %d\n",(int)blinking ,led->id);
 	if (blinking > 0) {
 		aw2013_write(led, AW_REG_GLOBAL_CONTROL,
 			AW_LED_MOUDLE_ENABLE_MASK);
@@ -344,13 +303,9 @@ static void aw2013_set_brightness(struct led_classdev *cdev,
 			     enum led_brightness brightness)
 {
 	struct aw2013_led *led = container_of(cdev, struct aw2013_led, cdev);
-
-	mutex_lock(&led->pdata->led->lock);
 	led->cdev.brightness = brightness;
 
-
-	aw2013_brightness_set(led);
-	mutex_unlock(&led->pdata->led->lock);
+	schedule_work(&led->brightness_work);
 }
 
 static ssize_t aw2013_store_blink(struct device *dev,
@@ -385,18 +340,6 @@ static ssize_t aw2013_led_time_show(struct device *dev,
 			led->pdata->fall_time_ms, led->pdata->off_time_ms);
 }
 
-static ssize_t status_show(struct device *dev,
-								struct device_attribute *attr, char *buf)
-{
-	u8 val = 0;
-		 struct led_classdev *led_cdev = dev_get_drvdata(dev);
-		 struct aw2013_led *led =
-						container_of(led_cdev, struct aw2013_led, cdev);
-		 aw2013_read(led, AW_REG_LED_ENABLE, &val);
-		 return snprintf(buf, PAGE_SIZE, "%d\n",
-						val);
-}
-
 static ssize_t aw2013_led_time_store(struct device *dev,
 			     struct device_attribute *attr,
 			     const char *buf, size_t len)
@@ -426,12 +369,10 @@ static ssize_t aw2013_led_time_store(struct device *dev,
 
 static DEVICE_ATTR(blink, 0664, NULL, aw2013_store_blink);
 static DEVICE_ATTR(led_time, 0664, aw2013_led_time_show, aw2013_led_time_store);
-static DEVICE_ATTR(status, 0664, status_show, NULL);
 
 static struct attribute *aw2013_led_attributes[] = {
 	&dev_attr_blink.attr,
 	&dev_attr_led_time.attr,
-	&dev_attr_status.attr,
 	NULL,
 };
 
@@ -442,14 +383,9 @@ static struct attribute_group aw2013_led_attr_group = {
 static int aw_2013_check_chipid(struct aw2013_led *led)
 {
 	u8 val;
-	if (aw2013_power_on(led->pdata->led, true)) {
-						dev_err(&led->pdata->led->client->dev,
-							   "power off failed");
-						return -1;
-		    }
-	aw2013_write(led, AW_REG_RESET, AW_LED_RESET_MASK);
 
-	udelay(2000);
+	aw2013_write(led, AW_REG_RESET, AW_LED_RESET_MASK);
+	usleep_range(AW_LED_RESET_DELAY, AW_LED_RESET_DELAY);
 	aw2013_read(led, AW_REG_RESET, &val);
 	if (val == AW2013_CHIPID)
 		return 0;
@@ -469,7 +405,7 @@ static int aw2013_led_err_handle(struct aw2013_led *led_array,
 		sysfs_remove_group(&led_array[i].cdev.dev->kobj,
 				&aw2013_led_attr_group);
 		led_classdev_unregister(&led_array[i].cdev);
-
+		cancel_work_sync(&led_array[i].brightness_work);
 		devm_kfree(&led_array->client->dev, led_array[i].pdata);
 		led_array[i].pdata = NULL;
 	}
@@ -564,7 +500,7 @@ static int aw2013_led_parse_child_node(struct aw2013_led *led_array,
 			goto free_pdata;
 		}
 
-
+		INIT_WORK(&led->brightness_work, aw2013_brightness_work);
 
 		led->cdev.brightness_set = aw2013_set_brightness;
 
@@ -590,7 +526,7 @@ static int aw2013_led_parse_child_node(struct aw2013_led *led_array,
 free_class:
 	aw2013_led_err_handle(led_array, parsed_leds);
 	led_classdev_unregister(&led_array[parsed_leds].cdev);
-
+	cancel_work_sync(&led_array[parsed_leds].brightness_work);
 	devm_kfree(&led->client->dev, led_array[parsed_leds].pdata);
 	led_array[parsed_leds].pdata = NULL;
 	return rc;
@@ -623,13 +559,26 @@ static int aw2013_led_probe(struct i2c_client *client,
 
 	led_array = devm_kzalloc(&client->dev,
 			(sizeof(struct aw2013_led) * num_leds), GFP_KERNEL);
-	if (!led_array)
+	if (!led_array) {
+		dev_err(&client->dev, "Unable to allocate memory\n");
 		return -ENOMEM;
-
+	}
 	led_array->client = client;
 	led_array->num_leds = num_leds;
 
 	mutex_init(&led_array->lock);
+
+	ret = aw2013_power_init(led_array, true);
+	if (ret) {
+		dev_err(&client->dev, "power init failed");
+		goto free_led_arry;
+	}
+
+	ret = aw_2013_check_chipid(led_array);
+	if (ret) {
+		dev_err(&client->dev, "Check chip id error\n");
+		goto free_led_arry;
+	}
 
 	ret = aw2013_led_parse_child_node(led_array, node);
 	if (ret) {
@@ -639,21 +588,8 @@ static int aw2013_led_probe(struct i2c_client *client,
 
 	i2c_set_clientdata(client, led_array);
 
-	ret = aw2013_power_init(led_array, true);
-	if (ret) {
-		dev_err(&client->dev, "power init failed");
-		goto fail_parsed_node;
-	}
-
-	ret = aw_2013_check_chipid(led_array);
-	if (ret) {
-		dev_err(&client->dev, "Check chip id error\n");
-		goto fail_parsed_node;
-	}
 	return 0;
 
-fail_parsed_node:
-	aw2013_led_err_handle(led_array, num_leds);
 free_led_arry:
 	mutex_destroy(&led_array->lock);
 	devm_kfree(&client->dev, led_array);
@@ -670,7 +606,7 @@ static int aw2013_led_remove(struct i2c_client *client)
 		sysfs_remove_group(&led_array[i].cdev.dev->kobj,
 				&aw2013_led_attr_group);
 		led_classdev_unregister(&led_array[i].cdev);
-
+		cancel_work_sync(&led_array[i].brightness_work);
 		devm_kfree(&client->dev, led_array[i].pdata);
 		led_array[i].pdata = NULL;
 	}
@@ -688,7 +624,7 @@ static const struct i2c_device_id aw2013_led_id[] = {
 MODULE_DEVICE_TABLE(i2c, aw2013_led_id);
 
 static struct of_device_id aw2013_match_table[] = {
-	{ .compatible = "awinic,aw2013_led-mi8953",},
+	{ .compatible = "awinic,aw2013-mi8953",},
 	{ },
 };
 
