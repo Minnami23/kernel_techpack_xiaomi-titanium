@@ -1,3 +1,4 @@
+obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_CORE)   += synaptics_dsx/
 obj-$(CONFIG_TOUCHSCREEN_NT36672)   += nt36672/
 obj-$(CONFIG_VITURALSAR)			+= vituralsar_driver.o
 obj-$(CONFIG_TOUCHSCREEN_TD4310_E7)       += td4310_e7/

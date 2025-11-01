@@ -3,6 +3,7 @@ source "techpack/xiaomi-titanium/touchscreen/ft5446_e6/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/td4310_e7/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/td4310_lansi_e7/Kconfig"
 source "techpack/xiaomi-titanium/touchscreen/gt9xx/Kconfig"
+source "techpack/xiaomi-titanium/touchscreen/synaptics_dsx/Kconfig"
 
 config TOUCHSCREEN_NT36672
 	bool "Novatek NT36672"
