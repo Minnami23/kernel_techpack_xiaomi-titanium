@@ -29,7 +29,7 @@
 #include <linux/spi/spi.h>
 #include "peelir.h"
 
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <asm/delay.h>
 
 #define SPI_MODE_MASK		(SPI_CPHA | SPI_CPOL | SPI_CS_HIGH \
