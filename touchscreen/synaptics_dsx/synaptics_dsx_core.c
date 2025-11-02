@@ -4661,9 +4661,9 @@ static int synaptics_rmi4_remove(struct platform_device *pdev)
 static void synaptics_rmi4_fb_notify_resume_work(struct work_struct *work)
 {
 	struct synaptics_rmi4_data *rmi4_data =
-		container_of(work, struct synaptics_rmi4_data, fb_notify_work);
-	synaptics_rmi4_resume(&(rmi4_data->input_dev->dev));
-	rmi4_data->fb_ready = true;
+		container_of(work, struct synaptics_rmi4_data, 
+		fb_notify_work);
+	synaptics_rmi4_resume(&rmi4_data->input_dev->dev);
 }
 
 static int synaptics_rmi4_fb_notifier_cb(struct notifier_block *self,
@@ -4676,13 +4676,16 @@ static int synaptics_rmi4_fb_notifier_cb(struct notifier_block *self,
 			fb_notifier);
 
 	if (evdata && evdata->data && rmi4_data) {
-		if (event == FB_EVENT_BLANK) {
+		if (event == FB_EARLY_EVENT_BLANK) {
 			transition = evdata->data;
 			if (*transition == FB_BLANK_POWERDOWN) {
 				synaptics_rmi4_suspend(
 					&rmi4_data->pdev->dev);
 				rmi4_data->fb_ready = false;
-			} else if (*transition == FB_BLANK_UNBLANK) {
+			}
+		} else if (event == FB_EVENT_BLANK) {
+			transition = evdata->data;
+			if (*transition == FB_BLANK_UNBLANK) {
 				synaptics_rmi4_resume(
 					&rmi4_data->pdev->dev);
 				rmi4_data->fb_ready = true;
