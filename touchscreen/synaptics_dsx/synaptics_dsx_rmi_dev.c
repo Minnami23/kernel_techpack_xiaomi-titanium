@@ -43,7 +43,6 @@
 #include <linux/gpio.h>
 #include <linux/uaccess.h>
 #include <linux/cdev.h>
-#include <linux/sched/signal.h>
 #include <linux/platform_device.h>
 #include "synaptics_dsx.h"
 #include "synaptics_dsx_core.h"
