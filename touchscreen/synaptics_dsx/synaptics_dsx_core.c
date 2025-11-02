@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2012-2016 Synaptics Incorporated. All rights reserved.
  *
- * Copyright (c) 2018-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018 The Linux Foundation. All rights reserved.
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
  *
@@ -46,8 +46,6 @@
 #ifdef KERNEL_ABOVE_2_6_38
 #include <linux/input/mt.h>
 #endif
-
-#include <linux/completion.h>
 
 #define INPUT_PHYS_NAME "synaptics_dsx/touch_input"
 #define STYLUS_PHYS_NAME "synaptics_dsx/stylus"
@@ -127,9 +125,11 @@ static int synaptics_rmi4_free_fingers(struct synaptics_rmi4_data *rmi4_data);
 static int synaptics_rmi4_reinit_device(struct synaptics_rmi4_data *rmi4_data);
 static int synaptics_rmi4_reset_device(struct synaptics_rmi4_data *rmi4_data,
 		bool rebuild);
+#ifdef CONFIG_FB
 static void synaptics_rmi4_fb_notify_resume_work(struct work_struct *work);
 static int synaptics_rmi4_fb_notifier_cb(struct notifier_block *self,
 		unsigned long event, void *data);
+#endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #ifndef CONFIG_FB
@@ -146,8 +146,6 @@ static int synaptics_rmi4_late_resume(struct early_suspend *h);
 static int synaptics_rmi4_suspend(struct device *dev);
 
 static int synaptics_rmi4_resume(struct device *dev);
-
-static void synaptics_rmi4_defer_probe(struct work_struct *work);
 
 static ssize_t synaptics_rmi4_f01_reset_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count);
@@ -4311,6 +4309,7 @@ EXPORT_SYMBOL(synaptics_rmi4_new_function);
 static int synaptics_rmi4_probe(struct platform_device *pdev)
 {
 	int retval;
+	unsigned char attr_count;
 	struct synaptics_rmi4_data *rmi4_data;
 	const struct synaptics_dsx_hw_interface *hw_if;
 	const struct synaptics_dsx_board_data *bdata;
@@ -4361,63 +4360,6 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 
 	vir_button_map = bdata->vir_button_map;
 
-	rmi4_data->initialized = false;
-	INIT_WORK(&rmi4_data->fb_notify_work,
-		  synaptics_rmi4_fb_notify_resume_work);
-	rmi4_data->fb_notifier.notifier_call = synaptics_rmi4_fb_notifier_cb;
-	retval = fb_register_client(&rmi4_data->fb_notifier);
-	if (retval < 0) {
-		dev_err(&pdev->dev,
-				"%s: Failed to register fb notifier client\n",
-				__func__);
-		goto err_drm_reg;
-	}
-
-	rmi4_data->rmi4_probe_wq = create_singlethread_workqueue(
-						"Synaptics_rmi4_probe_wq");
-	if (!rmi4_data->rmi4_probe_wq) {
-		dev_err(&pdev->dev,
-				"%s: Failed to create probe workqueue\n",
-				__func__);
-		goto err_probe_wq;
-	}
-	INIT_WORK(&rmi4_data->rmi4_probe_work, synaptics_rmi4_defer_probe);
-	queue_work(rmi4_data->rmi4_probe_wq, &rmi4_data->rmi4_probe_work);
-
-	return retval;
-
-err_probe_wq:
-	fb_unregister_client(&rmi4_data->fb_notifier);
-
-err_drm_reg:
-	kfree(rmi4_data);
-
-	return retval;
-}
-
-static void synaptics_rmi4_defer_probe(struct work_struct *work)
-{
-	int retval;
-	unsigned char attr_count;
-	struct synaptics_rmi4_data *rmi4_data = container_of(work,
-				struct synaptics_rmi4_data, rmi4_probe_work);
-	struct platform_device *pdev;
-	const struct synaptics_dsx_hw_interface *hw_if;
-	const struct synaptics_dsx_board_data *bdata;
-
-	pdev = rmi4_data->pdev;
-	hw_if = rmi4_data->hw_if;
-	bdata = hw_if->board_data;
-
-	init_completion(&rmi4_data->drm_init_done);
-	retval = wait_for_completion_interruptible(&rmi4_data->drm_init_done);
-	if (retval < 0) {
-		dev_err(&pdev->dev,
-				"%s: Wait for DRM init was interrupted\n",
-				__func__);
-		goto err_drm_init_wait;
-	}
-
 	retval = synaptics_rmi4_get_reg(rmi4_data, true);
 	if (retval < 0) {
 		dev_err(&pdev->dev,
@@ -4445,11 +4387,10 @@ static void synaptics_rmi4_defer_probe(struct work_struct *work)
 	retval = synaptics_dsx_pinctrl_init(rmi4_data);
 		if (!retval && rmi4_data->ts_pinctrl) {
 			/*
-			 * Pinctrl handle is optional.
-			 * If pinctrl handle is found let pins to be
-			 * configured in active state. If not found continue
-			 * further without error.
-			 */
+			* Pinctrl handle is optional. If pinctrl handle is found
+			* let pins to be configured in active state. If not
+			* found continue further without error.
+			*/
 			retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 					rmi4_data->pinctrl_state_active);
 			if (retval < 0) {
@@ -4476,6 +4417,18 @@ static void synaptics_rmi4_defer_probe(struct work_struct *work)
 				__func__);
 		goto err_set_input_dev;
 	}
+
+#ifdef CONFIG_FB
+	INIT_WORK(&rmi4_data->fb_notify_work,
+		  synaptics_rmi4_fb_notify_resume_work);
+	rmi4_data->fb_notifier.notifier_call = synaptics_rmi4_fb_notifier_cb;
+	retval = fb_register_client(&rmi4_data->fb_notifier);
+	if (retval < 0) {
+		dev_err(&pdev->dev,
+				"%s: Failed to register fb notifier client\n",
+				__func__);
+	}
+#endif
 
 #ifdef USE_EARLYSUSPEND
 	rmi4_data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
@@ -4555,9 +4508,8 @@ static void synaptics_rmi4_defer_probe(struct work_struct *work)
 	INIT_WORK(&rmi4_data->reset_work, synaptics_rmi4_reset_work);
 	queue_work(rmi4_data->reset_workqueue, &rmi4_data->reset_work);
 #endif
-	rmi4_data->initialized = true;
 
-	return;
+	return retval;
 
 err_sysfs:
 	for (attr_count--; attr_count >= 0; attr_count--) {
@@ -4575,6 +4527,10 @@ err_virtual_buttons:
 	synaptics_rmi4_irq_enable(rmi4_data, false, false);
 
 err_enable_irq:
+#ifdef CONFIG_FB
+	fb_unregister_client(&rmi4_data->fb_notifier);
+#endif
+
 #ifdef USE_EARLYSUSPEND
 	unregister_early_suspend(&rmi4_data->early_suspend);
 #endif
@@ -4605,12 +4561,13 @@ err_set_gpio:
 			devm_pinctrl_put(rmi4_data->ts_pinctrl);
 			rmi4_data->ts_pinctrl = NULL;
 		} else {
-			if (pinctrl_select_state(
-					rmi4_data->ts_pinctrl,
-					rmi4_data->pinctrl_state_release))
+			retval = pinctrl_select_state(
+				rmi4_data->ts_pinctrl,
+				rmi4_data->pinctrl_state_release);
+			if (retval)
 				dev_err(&pdev->dev,
-					"%s: Failed to select %s pinstate\n",
-					__func__, PINCTRL_STATE_RELEASE);
+					"%s: Failed to create sysfs attributes\n",
+					__func__);
 		}
 	}
 
@@ -4618,11 +4575,9 @@ err_enable_reg:
 	synaptics_rmi4_get_reg(rmi4_data, false);
 
 err_get_reg:
-err_drm_init_wait:
-	fb_unregister_client(&rmi4_data->fb_notifier);
-	cancel_work_sync(&rmi4_data->rmi4_probe_work);
-	destroy_workqueue(rmi4_data->rmi4_probe_wq);
 	kfree(rmi4_data);
+
+	return retval;
 }
 
 static int synaptics_rmi4_remove(struct platform_device *pdev)
@@ -4659,7 +4614,9 @@ static int synaptics_rmi4_remove(struct platform_device *pdev)
 
 	synaptics_rmi4_irq_enable(rmi4_data, false, false);
 
+#ifdef CONFIG_FB
 	fb_unregister_client(&rmi4_data->fb_notifier);
+#endif
 
 #ifdef USE_EARLYSUSPEND
 	unregister_early_suspend(&rmi4_data->early_suspend);
@@ -4695,14 +4652,12 @@ static int synaptics_rmi4_remove(struct platform_device *pdev)
 	synaptics_rmi4_enable_reg(rmi4_data, false);
 	synaptics_rmi4_get_reg(rmi4_data, false);
 
-	cancel_work_sync(&rmi4_data->rmi4_probe_work);
-	destroy_workqueue(rmi4_data->rmi4_probe_wq);
-
 	kfree(rmi4_data);
 
 	return 0;
 }
 
+#ifdef CONFIG_FB
 static void synaptics_rmi4_fb_notify_resume_work(struct work_struct *work)
 {
 	struct synaptics_rmi4_data *rmi4_data =
@@ -4721,22 +4676,23 @@ static int synaptics_rmi4_fb_notifier_cb(struct notifier_block *self,
 			fb_notifier);
 
 	if (evdata && evdata->data && rmi4_data) {
-			if (event == FB_EVENT_BLANK) {
-				transition = evdata->data;
-				if (*transition == FB_BLANK_POWERDOWN) {
-					synaptics_rmi4_suspend(
-						&rmi4_data->pdev->dev);
-					rmi4_data->fb_ready = false;
-				} else if (*transition == FB_BLANK_UNBLANK) {
-					synaptics_rmi4_resume(
-						&rmi4_data->pdev->dev);
-					rmi4_data->fb_ready = true;
-				}
+		if (event == FB_EVENT_BLANK) {
+			transition = evdata->data;
+			if (*transition == FB_BLANK_POWERDOWN) {
+				synaptics_rmi4_suspend(
+					&rmi4_data->pdev->dev);
+				rmi4_data->fb_ready = false;
+			} else if (*transition == FB_BLANK_UNBLANK) {
+				synaptics_rmi4_resume(
+					&rmi4_data->pdev->dev);
+				rmi4_data->fb_ready = true;
 			}
+		}
 	}
 
 	return 0;
 }
+#endif
 
 #ifdef USE_EARLYSUSPEND
 static int synaptics_rmi4_early_suspend(struct early_suspend *h)
@@ -4978,8 +4934,10 @@ exit:
 
 #ifdef CONFIG_PM
 static const struct dev_pm_ops synaptics_rmi4_dev_pm_ops = {
+#ifndef CONFIG_FB
 	.suspend = synaptics_rmi4_suspend,
 	.resume = synaptics_rmi4_resume,
+#endif
 };
 #endif
 
@@ -5013,7 +4971,7 @@ static void __exit synaptics_rmi4_exit(void)
 	synaptics_rmi4_bus_exit();
 }
 
-module_init(synaptics_rmi4_init);
+late_initcall(synaptics_rmi4_init);
 module_exit(synaptics_rmi4_exit);
 
 MODULE_AUTHOR("Synaptics, Inc.");

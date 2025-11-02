@@ -356,7 +356,6 @@ struct synaptics_rmi4_f01_device_status {
  * @report_touch: pointer to touch reporting function
  */
 struct synaptics_rmi4_data {
-	bool initialized;
 	struct platform_device *pdev;
 	struct input_dev *input_dev;
 	struct input_dev *stylus_dev;
@@ -375,17 +374,16 @@ struct synaptics_rmi4_data {
 	struct mutex rmi4_irq_enable_mutex;
 	struct delayed_work rb_work;
 	struct workqueue_struct *rb_workqueue;
-	struct work_struct rmi4_probe_work;
-	struct workqueue_struct *rmi4_probe_wq;
-	struct completion drm_init_done;
 	struct pinctrl *ts_pinctrl;
 	struct pinctrl_state *pinctrl_state_active;
 	struct pinctrl_state *pinctrl_state_suspend;
 	struct pinctrl_state *pinctrl_state_release;
+#ifdef CONFIG_FB
 	struct work_struct fb_notify_work;
 	struct notifier_block fb_notifier;
 	struct work_struct reset_work;
 	struct workqueue_struct *reset_workqueue;
+#endif
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	struct early_suspend early_suspend;
 #endif

@@ -43,7 +43,6 @@
 #include <linux/platform_device.h>
 #include "synaptics_dsx.h"
 #include "synaptics_dsx_core.h"
-#include "linux/moduleparam.h"
 
 #define SYN_I2C_RETRY_TIMES 10
 #define rd_msgs  1
@@ -53,7 +52,6 @@ static unsigned char *wr_buf;
 static struct synaptics_dsx_hw_interface hw_if;
 
 static struct platform_device *synaptics_dsx_i2c_device;
-
 
 #ifdef CONFIG_OF
 static int parse_dt(struct device *dev, struct synaptics_dsx_board_data *bdata)
