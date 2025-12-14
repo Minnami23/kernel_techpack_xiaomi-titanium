@@ -1131,7 +1131,7 @@ Description:
 return:
 	Executive outcomes. 0---NVT IC. -1---not NVT IC.
 *******************************************************/
-static int8_t nvt_ts_check_chip_ver_trim(void)
+static int8_t nvt_ts_check_chip_ver_trim(uint32_t chip_ver_trim_addr)
 {
 	uint8_t buf[8] = {0};
 	int32_t retry = 0;
@@ -1151,9 +1151,9 @@ static int8_t nvt_ts_check_chip_ver_trim(void)
 		CTP_I2C_WRITE(ts->client, I2C_HW_Address, buf, 2);
 		msleep(10);
 
-		nvt_set_page(I2C_BLDR_Address, 0x1F64E);
+		nvt_set_page(I2C_BLDR_Address, chip_ver_trim_addr);
 
-		buf[0] = 0x4E;
+		buf[0] = chip_ver_trim_addr & 0xFF;
 		buf[1] = 0x00;
 		buf[2] = 0x00;
 		buf[3] = 0x00;
@@ -1255,11 +1255,15 @@ static int32_t nvt_ts_probe(struct i2c_client *client, const struct i2c_device_i
 	msleep(10);
 
 	//---check chip version trim---
-	ret = nvt_ts_check_chip_ver_trim();
+	ret = nvt_ts_check_chip_ver_trim(CHIP_VER_TRIM_ADDR);
 	if (ret) {
-		NVT_ERR("chip is not identified\n");
-		ret = -EINVAL;
-		goto err_chipvertrim_failed;
+		NVT_LOG("try to check from old chip ver trim address\n");
+		ret = nvt_ts_check_chip_ver_trim(CHIP_VER_TRIM_OLD_ADDR);
+		if (ret) {
+			NVT_ERR("chip is not identified\n");
+			ret = -EINVAL;
+			goto err_chipvertrim_failed;
+		}
 	}
 
 	nvt_bootloader_reset();
