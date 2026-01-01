@@ -1,0 +1,56 @@
+config GPIO_QPNP_PIN
+	tristate "Qualcomm Technologies, Inc. QPNP GPIO support"
+	depends on SPMI
+	help
+	  Say 'y' here to include support for the Qualcomm Technologies, Inc.
+	  QPNP GPIO driver.  This driver supports Device Tree and allows a
+	  device_node to be registered as a gpio-controller.  It does not handle
+	  GPIO interrupts directly; they are handled via the SPMI arbiter
+	  interrupt driver.
+
+config GPIO_QPNP_PIN_DEBUG
+	bool "Qualcomm Technologies, Inc. QPNP GPIO debug support"
+	depends on GPIO_QPNP_PIN && DEBUG_FS
+	help
+	  Say 'y' here to include debug support for the Qualcomm Technologies,
+	  Inc. QPNP GPIO driver.  This provides a userspace debug interface to
+	  get and set all of the supported features of PMIC GPIO and MPP pins
+	  including those which are managed by the gpio framework.
+
+config LEDS_QPNP
+	tristate "Support for QPNP LEDs"
+	depends on LEDS_CLASS && SPMI
+	help
+	  This driver supports the LED functionality of Qualcomm Technologies,
+	  Inc. QPNP PMICs.  It primarily supports controlling tri-color RGB
+	  LEDs in both PWM and light pattern generator (LPG) modes.  For older
+	  PMICs, it also supports WLEDs and flash LEDs.
+
+config QPNP_COINCELL
+	tristate "QPNP coincell charger support"
+	depends on SPMI
+	help
+	  This driver supports the QPNP coincell peripheral found inside of
+	  Qualcomm Technologies, Inc. QPNP PMIC devices.  The coincell charger
+	  provides a means to charge a coincell battery or backup capacitor
+	  which is used to maintain PMIC register state when the main battery is
+	  removed from the mobile device.
+
+config PWM_QPNP
+	tristate "Qualcomm Technologies, Inc. QPNP LPG/PWM support"
+	depends on SPMI
+	help
+	  This driver supports PWM/LPG devices in Qualcomm Technologies, Inc.
+	  PMIC chips which comply with QPNP.  QPNP is an SPMI based PMIC
+	  implementation.  These devices support Pulse Width Modulation output
+	  with user generated patterns. They share a lookup table with size of
+	  64 entries.
+
+config RTC_DRV_QPNP
+	tristate "Qualcomm Technologies, Inc. QPNP PMIC RTC"
+	depends on SPMI
+	help
+	  This enables support for the RTC found on Qualcomm Technologies, Inc.
+	  QPNP PMIC chips.  This driver supports using the PMIC RTC peripheral
+	  to wake a mobile device up from suspend or to wake it up from power-
+	  off.

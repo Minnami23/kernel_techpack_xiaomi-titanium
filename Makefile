@@ -3,6 +3,7 @@ obj-$(CONFIG_INPUT_TOUCHSCREEN) += touchscreen/
 obj-y += fingerprint/
 obj-y += ir/
 obj-$(CONFIG_NEW_LEDS) += leds/
+obj-y += pmic/
 obj-y += power_supply/
 obj-y += vibrator/
 else
