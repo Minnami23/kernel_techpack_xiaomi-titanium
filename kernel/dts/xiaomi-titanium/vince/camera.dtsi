@@ -44,6 +44,7 @@
                 cell-index = <0>;
                 qcom,eeprom-name = "vince_ov12a10_sunny";
                 compatible = "qcom,eeprom";
+				qcom,i2c-freq-mode = <1>;
                 qcom,slave-addr = <0xb0>;
                 qcom,cci-master = <0>;
                 reg = <0x0>;
@@ -94,6 +95,7 @@
                 cell-index = <0>;
                 qcom,eeprom-name = "vince_imx486_ofilm";
                 compatible = "qcom,eeprom";
+				qcom,i2c-freq-mode = <1>;
                 qcom,slave-addr = <0xA0>;
                 qcom,cci-master = <0>;
                 reg = <0x0>;
@@ -147,6 +149,7 @@
                 qcom,cci-master = <1>;
 
                 qcom,eeprom-name = "vince_ov5675_qtech";
+				qcom,i2c-freq-mode = <1>;
                 qcom,slave-addr = <0x6c>;
 
                 qcom,num-blocks = <10>;
@@ -231,6 +234,7 @@
                 qcom,cci-master = <1>;
 
                 qcom,eeprom-name = "vince_ov5675_ofilm";
+				qcom,i2c-freq-mode = <1>;
                 qcom,slave-addr = <0x6c>;
 
                 qcom,num-blocks = <10>;
