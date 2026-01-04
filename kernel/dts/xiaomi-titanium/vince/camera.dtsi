@@ -40,7 +40,7 @@
                 qcom,cam-vreg-op-mode = <80000>;
         };
 
-	   eeprom0: qcom,eeprom@ {
+	   eeprom0: qcom,eeprom@0 {
                 cell-index = <0>;
                 qcom,eeprom-name = "vince_ov12a10_sunny";
                 compatible = "qcom,eeprom";
