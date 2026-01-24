@@ -59,7 +59,7 @@
 #define NVT_ERR(fmt, args...)    pr_err("[%s] %s %d: " fmt, NVT_I2C_NAME, __func__, __LINE__, ##args)
 
 //---Input device info.---
-#define NVT_TS_NAME "NVTCapacitiveTouchScreen"
+#define NVT_TS_NAME "nt36xxx"
 
 
 //---Touch info.---
