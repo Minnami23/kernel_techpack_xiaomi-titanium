@@ -32,7 +32,7 @@
 
 #include "nt36xxx_mem_map.h"
 
-#define NVT_DEBUG 1
+#define NVT_DEBUG 0
 
 //---GPIO number---
 #define NVTTOUCH_RST_PIN 980
@@ -72,7 +72,7 @@ extern const uint16_t touch_key_array[TOUCH_KEY_NUM];
 #endif
 #define TOUCH_FORCE_NUM 1000
 
-/* Enable only when module have tp reset pin and connected to host */*/
+/* Enable only when module have tp reset pin and connected to host */
 #define NVT_TOUCH_SUPPORT_HW_RST 1
 
 //---Customerized func.---
