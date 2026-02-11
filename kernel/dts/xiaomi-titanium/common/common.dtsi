@@ -4,3 +4,4 @@
 #include "sdhc.dtsi"
 #include "spi.dtsi"
 #include "pinctrl.dtsi"
+#include "audio.dtsi"
