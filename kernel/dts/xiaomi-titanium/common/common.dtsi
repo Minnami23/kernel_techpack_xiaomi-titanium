@@ -3,3 +3,4 @@
 #include "cpu.dtsi"
 #include "sdhc.dtsi"
 #include "spi.dtsi"
+#include "pinctrl.dtsi"
