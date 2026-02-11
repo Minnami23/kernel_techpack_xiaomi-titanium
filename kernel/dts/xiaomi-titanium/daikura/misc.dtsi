@@ -21,3 +21,21 @@
 		};
 	};
 };
+
+&spi_6 {
+	status = "ok";
+	peel_ir@0 {
+		compatible = "peel_ir";
+		reg = <0x0>;
+		spi-max-frequency = <19200000>;
+		vdd-supply = <&pm8953_l8>; //vdd
+		peel_ir,reg-id = "vdd";
+		peel_ir,lr-gpio = <73>;
+		peel_ir,lr-gpio-valid = <0>;
+		peel_ir,spi-bpw = <32>;
+		peel_ir,spi-clk-speed = <960000>;
+		peel_ir,spi-mode = <0>;
+		peel_ir,peel-field = <2345>;
+		status = "ok";
+	};
+};
