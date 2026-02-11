@@ -41,6 +41,9 @@
 #include <linux/gpio.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
+#ifdef CONFIG_FB
+#include <linux/fb.h>
+#endif
 #include "synaptics_dsx.h"
 #include "synaptics_dsx_core.h"
 #include <linux/delay.h>
