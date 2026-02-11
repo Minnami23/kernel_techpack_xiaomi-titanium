@@ -1,5 +1,7 @@
 /* msm8953-audio */
 &int_codec {
+    qcom,msm-mbhc-hphl-swh = <1>;
+	qcom,msm-mbhc-gnd-swh = <1>;
 	/delete-property/asoc-wsa-codec-names;
 	/delete-property/asoc-wsa-codec-prefixes;
 };
