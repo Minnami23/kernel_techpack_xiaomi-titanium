@@ -79,12 +79,5 @@
                         focal,virtual_key_2 = <139 200 2040>;/*menu*/
                         focal,virtual_key_3 = <158 800 2040>;/*back*/
              };
-        vituralsar@33{
-						compatible = "virtualsar,sar";
-						reg = <0x33>;
-						interrupt-parent = <&tlmm>;
-						interrupts = <130 0x02>;
-						vituralsar,irq-gpio = <&tlmm 130 0x2008>;
-			};
 	};
 };
