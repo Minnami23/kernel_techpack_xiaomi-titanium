@@ -10,3 +10,24 @@
 		23 1e 07 08 05 03 04 a0
 		23 18 07 08 05 03 04 a0];
 };
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_otm1911_fhd_vid>;
+};
+
+&dsi_otm1911_fhd_vid {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&dsi_ili7807_fhdplus_vid {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&dsi_hx8399c_fhdplus_vid {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&dsi_otm1911_fhdplus_vid {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+
+};
