@@ -3,3 +3,4 @@
 #include "touchscreen.dtsi"
 #include "camera.dtsi"
 #include "audio.dtsi"
+#include "misc.dtsi"

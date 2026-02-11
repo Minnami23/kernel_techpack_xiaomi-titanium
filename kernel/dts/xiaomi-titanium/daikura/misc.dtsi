@@ -1,0 +1,23 @@
+/* msm8953-qrd */
+&soc {
+	i2c@78b6000 { /* BLSP1 QUP3 */
+        led_aw2023: aw2023@46 {
+			compatible = "awinic,aw2023_led-mi8953";
+			reg = <0x46>;
+			vcc-supply = <&pm8953_l5>;
+			vdd-supply = <&pm8953_l10>;
+
+			aw2023,red {
+				aw2023,name = "white";
+				aw2023,id = <0>;
+				aw2023,imax = <2>;
+				aw2023,led-current = <15>;
+				aw2023,max-brightness = <150>;
+				aw2023,rise-time-ms = <6>;
+				aw2023,hold-time-ms = <0>;
+				aw2023,fall-time-ms = <6>;
+				aw2023,off-time-ms = <4>;
+			};
+		};
+	};
+};

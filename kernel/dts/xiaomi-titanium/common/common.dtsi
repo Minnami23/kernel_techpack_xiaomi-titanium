@@ -8,3 +8,4 @@
 #include "haptic.dtsi"
 #include "display.dtsi"
 #include "regulator.dtsi"
+#include "leds.dtsi"
