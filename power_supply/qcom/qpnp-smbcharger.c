@@ -39,7 +39,7 @@
 #include <linux/qpnp/qpnp-adc.h>
 #include <linux/batterydata-lib.h>
 #include <linux/of_batterydata.h>
-#include <linux/msm_bcl.h>
+#include <xiaomi-titanium//msm_bcl.h>
 #include <linux/ktime.h>
 #include <linux/extcon-provider.h>
 #include <linux/pmic-voter.h>
