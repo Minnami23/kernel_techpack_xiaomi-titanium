@@ -1838,8 +1838,6 @@ static void test_set_report_size (void)
 	default:
 		f54->report_size = 0;
 	}
-
-	return;
 }
 
 static int test_set_interrupt (bool set)
@@ -2263,8 +2261,6 @@ static void test_timeout_work (struct work_struct *work)
 
 exit:
 	mutex_unlock (&f54->status_mutex);
-
-	return;
 }
 
 static enum hrtimer_restart test_get_report_timeout (struct hrtimer *timer)
@@ -5143,7 +5139,6 @@ exit:
 		f54->report_size = 0;
 
 	f54->status = retval;
-	return;
 }
 
 static void test_remove_sysfs (void)
@@ -5151,8 +5146,6 @@ static void test_remove_sysfs (void)
 	sysfs_remove_group (f54->sysfs_dir, &attr_group);
 	sysfs_remove_bin_file (f54->sysfs_dir, &test_report_data);
 	kobject_put (f54->sysfs_dir);
-
-	return;
 }
 
 
@@ -5281,8 +5274,6 @@ static void test_free_control_mem (void)
 	kfree (control.reg_182);
 	kfree (control.reg_188);
 	kfree (control.reg_223);
-
-	return;
 }
 
 static void test_set_data (void)
@@ -5400,8 +5391,6 @@ static void test_set_data (void)
 		f54->data_31.address = reg_addr;
 		reg_addr++;
 	}
-
-	return;
 }
 
 static int test_set_controls (void)
@@ -6598,8 +6587,6 @@ static void test_f54_set_regs (struct synaptics_rmi4_data *rmi4_data,
 			ii++) {
 		f54->intr_mask |= 1 << ii;
 	}
-
-	return;
 }
 
 static int test_f55_set_controls (void)
@@ -6941,25 +6928,31 @@ static void test_f55_init (struct synaptics_rmi4_data *rmi4_data)
 	unsigned char ii;
 	unsigned char rx_electrodes;
 	unsigned char tx_electrodes;
-	struct f55_control_43 ctrl_43;
+	struct f55_control_43 *ctrl_43 = NULL;
+ 
+ 	ctrl_43 = kzalloc(sizeof(*ctrl_43), GFP_KERNEL);
+ 	if (!ctrl_43) {
+ 		retval = -ENOMEM;
+ 		goto exit;
+ 	}
 
 	retval = test_f55_set_queries ();
 	if (retval < 0) {
 		dev_err (rmi4_data->pdev->dev.parent,
 				"%s: Failed to read F55 query registers\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	if (!f55->query.has_sensor_assignment)
-		return;
+		goto exit;
 
 	retval = test_f55_set_controls ();
 	if (retval < 0) {
 		dev_err (rmi4_data->pdev->dev.parent,
 				"%s: Failed to set up F55 control registers\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	tx_electrodes = f55->query.num_of_tx_electrodes;
@@ -6976,7 +6969,7 @@ static void test_f55_init (struct synaptics_rmi4_data *rmi4_data)
 		dev_err (rmi4_data->pdev->dev.parent,
 				"%s: Failed to read F55 tx assignment\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	retval = synaptics_rmi4_reg_read (rmi4_data,
@@ -6987,7 +6980,7 @@ static void test_f55_init (struct synaptics_rmi4_data *rmi4_data)
 		dev_err (rmi4_data->pdev->dev.parent,
 				"%s: Failed to read F55 rx assignment\n",
 				__func__);
-		return;
+		goto exit;
 	}
 
 	f54->tx_assigned = 0;
@@ -7010,21 +7003,21 @@ static void test_f55_init (struct synaptics_rmi4_data *rmi4_data)
 	if (f55->extended_amp) {
 		retval = synaptics_rmi4_reg_read (rmi4_data,
 				f55->control_base_addr + f55->afe_mux_offset,
-				ctrl_43.data,
-				sizeof (ctrl_43.data));
+				ctrl_43->data,
+				sizeof (ctrl_43->data));
 		if (retval < 0) {
 			dev_err (rmi4_data->pdev->dev.parent,
 					"%s: Failed to read F55 AFE mux sizes\n",
 					__func__);
-			return;
+			goto exit;
 		}
 
-		f54->tx_assigned = ctrl_43.afe_l_mux_size +
-				ctrl_43.afe_r_mux_size;
+		f54->tx_assigned = ctrl_43->afe_l_mux_size +
+				ctrl_43->afe_r_mux_size;
 		/* tddi f54 test reporting +  */
-		f54->swap_sensor_side = ctrl_43.swap_sensor_side;
-		f54->left_mux_size = ctrl_43.afe_l_mux_size;
-		f54->right_mux_size = ctrl_43.afe_r_mux_size;
+		f54->swap_sensor_side = ctrl_43->swap_sensor_side;
+		f54->left_mux_size = ctrl_43->afe_l_mux_size;
+		f54->right_mux_size = ctrl_43->afe_r_mux_size;
 		/* tddi f54 test reporting -  */
 	}
 
@@ -7041,7 +7034,7 @@ static void test_f55_init (struct synaptics_rmi4_data *rmi4_data)
 			dev_err (rmi4_data->pdev->dev.parent,
 					"%s: Failed to read F55 force tx assignment\n",
 					__func__);
-			return;
+			goto exit;
 		}
 
 		retval = synaptics_rmi4_reg_read (rmi4_data,
@@ -7052,7 +7045,7 @@ static void test_f55_init (struct synaptics_rmi4_data *rmi4_data)
 			dev_err (rmi4_data->pdev->dev.parent,
 					"%s: Failed to read F55 force rx assignment\n",
 					__func__);
-			return;
+			goto exit;
 		}
 
 		for (ii = 0; ii < tx_electrodes; ii++) {
@@ -7066,6 +7059,8 @@ static void test_f55_init (struct synaptics_rmi4_data *rmi4_data)
 		}
 	}
 
+exit:
+	kfree(ctrl_43);
 	return;
 }
 
@@ -7085,8 +7080,6 @@ static void test_f55_set_regs (struct synaptics_rmi4_data *rmi4_data,
 	f55->control_base_addr = fd->ctrl_base_addr | (page << 8);
 	f55->data_base_addr = fd->data_base_addr | (page << 8);
 	f55->command_base_addr = fd->cmd_base_addr | (page << 8);
-
-	return;
 }
 
 static void test_f21_init (struct synaptics_rmi4_data *rmi4_data)
@@ -7230,8 +7223,6 @@ exit:
 	kfree (query_2);
 	kfree (query_5);
 	kfree (query_11);
-
-	return;
 }
 
 static void test_f21_set_regs (struct synaptics_rmi4_data *rmi4_data,
@@ -7250,8 +7241,6 @@ static void test_f21_set_regs (struct synaptics_rmi4_data *rmi4_data,
 	f21->control_base_addr = fd->ctrl_base_addr | (page << 8);
 	f21->data_base_addr = fd->data_base_addr | (page << 8);
 	f21->command_base_addr = fd->cmd_base_addr | (page << 8);
-
-	return;
 }
 
 static int test_scan_pdt (void)
@@ -7262,7 +7251,6 @@ static int test_scan_pdt (void)
 	unsigned short addr;
 	bool f54found = false;
 	bool f55found = false;
-	struct synaptics_rmi4_fn_desc rmi_fd;
 	struct synaptics_rmi4_data *rmi4_data = f54->rmi4_data;
 
 	for (page = 0; page < PAGES_TO_SERVICE; page++) {
@@ -7271,30 +7259,31 @@ static int test_scan_pdt (void)
 
 			retval = synaptics_rmi4_reg_read (rmi4_data,
 					addr,
-					 (unsigned char *)&rmi_fd,
-					sizeof (rmi_fd));
+					(unsigned char *)&rmi4_data->rmi_fd,
+					sizeof(rmi4_data->rmi_fd));
 			if (retval < 0)
 				return retval;
 
 			addr &= ~(MASK_8BIT << 8);
 
-			if (!rmi_fd.fn_number)
+			if (!rmi4_data->rmi_fd.fn_number)
 				break;
 
-			switch (rmi_fd.fn_number) {
+			switch (rmi4_data->rmi_fd.fn_number) {
 			case SYNAPTICS_RMI4_F54:
 				test_f54_set_regs (rmi4_data,
-						&rmi_fd, intr_count, page);
+						&rmi4_data->rmi_fd, intr_count,
+						page);
 				f54found = true;
 				break;
 			case SYNAPTICS_RMI4_F55:
 				test_f55_set_regs (rmi4_data,
-						&rmi_fd, page);
+						&rmi4_data->rmi_fd, page);
 				f55found = true;
 				break;
 			case SYNAPTICS_RMI4_F21:
 				test_f21_set_regs (rmi4_data,
-						&rmi_fd, page);
+						&rmi4_data->rmi_fd, page);
 				break;
 			default:
 				break;
@@ -7303,7 +7292,7 @@ static int test_scan_pdt (void)
 			if (f54found && f55found)
 				goto pdt_done;
 
-			intr_count += rmi_fd.intr_src_count;
+			intr_count += rmi4_data->rmi_fd.intr_src_count;
 		}
 	}
 
@@ -7476,8 +7465,6 @@ static void synaptics_rmi4_test_remove (struct synaptics_rmi4_data *rmi4_data)
 
 exit:
 	complete (&test_remove_complete_lansi);
-
-	return;
 }
 
 static void synaptics_rmi4_test_reset (struct synaptics_rmi4_data *rmi4_data)
@@ -7600,8 +7587,6 @@ static void __exit rmi4_test_module_exit (void)
 
 
 	remove_proc_entry ("tp_data_dump", NULL);
-
-	return;
 }
 
 module_init (rmi4_test_module_init);
