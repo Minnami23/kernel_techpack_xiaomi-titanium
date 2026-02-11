@@ -39,3 +39,44 @@
 		status = "ok";
 	};
 };
+
+&flash_led {
+	pmi8950_flash0: qcom,flash_0 {
+		label = "flash";
+		qcom,led-name = "led:flash_0";
+		qcom,default-led-trigger =
+				"flash0_trigger";
+		qcom,max-current = <1000>;
+		qcom,duration = <1280>;
+		qcom,id = <0>;
+		qcom,current = <1000>;
+	};
+	pmi8950_flashlight: qcom,flashlight {
+                label = "torch";
+                qcom,led-name = "flashlight";
+                qcom,default-led-trigger =
+                                "torch0_trigger";
+                qcom,max-current = <200>;
+                qcom,id = <0>;
+                qcom,current = <120>;
+	};
+	pmi8950_torch0: qcom,torch_0 {
+		label = "torch";
+		qcom,led-name = "led:torch_0";
+		qcom,default-led-trigger =
+				"torch0_trigger";
+		qcom,max-current = <200>;
+		qcom,id = <0>;
+		qcom,current = <120>;
+	};
+};
+
+&flash_led {
+	/delete-node/ qcom,flash_1;
+	/delete-node/ qcom,torch_1;
+};
+
+&led_flash0{
+	qcom,flash-source = <&pmi8950_flash0>;
+	qcom,torch-source = <&pmi8950_torch0>;
+};
