@@ -6,3 +6,4 @@
 #include "pinctrl.dtsi"
 #include "fingerprint.dtsi"
 #include "pmic.dtsi"
+#include "battery.dtsi"
