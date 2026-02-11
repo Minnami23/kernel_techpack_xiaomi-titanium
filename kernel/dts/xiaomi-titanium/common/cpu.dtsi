@@ -26,3 +26,17 @@
   		};
 	};
 };
+
+&thermal_zones {
+	case-therm-adc {
+		status = "disabled";
+	};
+
+	case-therm-step {
+		status = "disabled";
+	};
+
+	quiet-therm-step {
+		status = "disabled";
+	};
+};
