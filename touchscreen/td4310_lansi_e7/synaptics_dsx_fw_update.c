@@ -43,6 +43,7 @@
 
 #include "synaptics_dsx_lansi.h"
 #include "synaptics_dsx_core.h"
+#include <linux/seq_file.h>
 #include <linux/proc_fs.h>
 
 
