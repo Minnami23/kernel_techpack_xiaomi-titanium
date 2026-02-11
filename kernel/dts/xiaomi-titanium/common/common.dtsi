@@ -5,3 +5,4 @@
 #include "spi.dtsi"
 #include "pinctrl.dtsi"
 #include "audio.dtsi"
+#include "haptic.dtsi"
