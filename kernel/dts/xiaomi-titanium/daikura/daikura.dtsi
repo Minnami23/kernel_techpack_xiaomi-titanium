@@ -3,3 +3,4 @@
 #include "camera.dtsi"
 #include "audio.dtsi"
 #include "misc.dtsi"
+#include "pinctrl.dtsi"
