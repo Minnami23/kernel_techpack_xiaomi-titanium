@@ -33,7 +33,7 @@
 * 1.Included header files
 *****************************************************************************/
 #include "focaltech_core.h"
-#include "touchscreen.h"
+#include <xiaomi-titanium/touchscreen.h>
 
 /******************************************************************************
 * Private constant and macro definitions using #define

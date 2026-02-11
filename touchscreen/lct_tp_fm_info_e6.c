@@ -5,7 +5,7 @@
 #include <linux/proc_fs.h>
 #include <linux/device.h>
 #include <linux/miscdevice.h>
-#include "lct_tp_fm_info_e6.h"
+#include <xiaomi-titanium/lct_tp_fm_info_e6.h>
 
 static struct kobject *msm_tp_device;
 static u16 tp_ver_show = 0;

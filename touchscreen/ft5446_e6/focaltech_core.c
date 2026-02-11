@@ -33,8 +33,8 @@
 * Included header files
 *****************************************************************************/
 #include "focaltech_core.h"
-#include "touchscreen.h"
-#include "../lct_tp_fm_info_e6.h"
+#include <xiaomi-titanium/touchscreen.h>
+#include <xiaomi-titanium/lct_tp_fm_info_e6.h>
 
 
 #if defined(CONFIG_FB)

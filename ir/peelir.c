@@ -27,7 +27,7 @@
 #include <linux/gpio.h>
 #include <linux/miscdevice.h>
 #include <linux/spi/spi.h>
-#include "peelir.h"
+#include <xiaomi-titanium/peelir.h>
 
 #include <linux/uaccess.h>
 #include <asm/delay.h>

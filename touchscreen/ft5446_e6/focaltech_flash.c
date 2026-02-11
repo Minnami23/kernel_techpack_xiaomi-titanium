@@ -35,7 +35,7 @@
 *****************************************************************************/
 #include "focaltech_core.h"
 #include "focaltech_flash.h"
-#include "../lct_tp_fm_info_e6.h"
+#include <xiaomi-titanium/lct_tp_fm_info_e6.h>
 
 /*****************************************************************************
 * Static variables
