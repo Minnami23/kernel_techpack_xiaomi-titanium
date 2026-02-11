@@ -1,0 +1,12 @@
+#include "../common/panel/dsi-panel-otm1911-fhd-video.dtsi"
+#include "../common/panel/dsi-panel-otm1911-fhdplus-video.dtsi"
+#include "../common/panel/dsi-panel-ili7807-fhdplus-video.dtsi"
+#include "../common/panel/dsi-panel-hx8399c-fhdplus-video.dtsi"
+
+&dsi_otm1911_fhd_vid {
+	qcom,mdss-dsi-panel-timings-phy-v2 = [23 1e 07 08 05 03 04 a0
+		23 1e 07 08 05 03 04 a0
+		23 1e 07 08 05 03 04 a0
+		23 1e 07 08 05 03 04 a0
+		23 18 07 08 05 03 04 a0];
+};

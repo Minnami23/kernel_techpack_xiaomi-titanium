@@ -6,3 +6,4 @@
 #include "pinctrl.dtsi"
 #include "audio.dtsi"
 #include "haptic.dtsi"
+#include "display.dtsi"
