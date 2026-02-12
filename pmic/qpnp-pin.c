@@ -27,7 +27,7 @@
 #include <linux/export.h>
 #include <linux/module.h>
 #include <linux/export.h>
-#include <msm-titanium/pin.h>
+#include <xiaomi-titanium/pin.h>
 
 #define Q_REG_ADDR(q_spec, reg_index)	\
 		((q_spec)->offset + reg_index)
