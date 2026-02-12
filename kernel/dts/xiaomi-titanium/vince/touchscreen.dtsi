@@ -6,7 +6,7 @@
 			compatible = "synaptics,dsx-i2c";
 			reg = <0x20>;
 			interrupt-parent = <&tlmm>;
-			interrupts = <65 0x2>;
+			interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
 			vdd-supply = <&pm8953_l10>;
 			avdd-supply = <&pm8953_l6>;
 			pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
@@ -242,7 +242,7 @@
 			compatible = "synaptics_lansi,dsx-i2c";
 			reg = <0x70>;
 			interrupt-parent = <&tlmm>;
-			interrupts = <65 0x2>;
+			interrupts = <65 IRQ_TYPE_EDGE_FALLING>;
 			vdd-supply = <&pm8953_l10>;
 			avdd-supply = <&pm8953_l6>;
 			pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
