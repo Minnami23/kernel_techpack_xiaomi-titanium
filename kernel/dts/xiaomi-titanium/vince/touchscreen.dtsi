@@ -10,8 +10,8 @@
 			vdd-supply = <&pm8953_l10>;
 			avdd-supply = <&pm8953_l6>;
 			pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
-			pinctrl-0 = <&ts_int_active &ts_reset_active>;
-			pinctrl-1 = <&synaptic_int_suspend &synaptic_reset_suspend>;
+    		pinctrl-0 = <&ts_init_pins>;
+    		pinctrl-1 = <&ts_suspend_pins>;
 			synaptics,pwr-reg-name = "avdd";
 			synaptics,bus-reg-name = "vdd";
 			synaptics,ub-i2c-addr = <0x2c>;
@@ -246,8 +246,8 @@
 			vdd-supply = <&pm8953_l10>;
 			avdd-supply = <&pm8953_l6>;
 			pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
-			pinctrl-0 = <&ts_int_active &ts_reset_active>;
-			pinctrl-1 = <&synaptic_int_suspend &synaptic_reset_suspend>;
+    		pinctrl-0 = <&ts_init_pins>;
+    		pinctrl-1 = <&ts_suspend_pins>;
 			synaptics,pwr-reg-name = "avdd";
 			synaptics,bus-reg-name = "vdd";
 			synaptics,ub-i2c-addr = <0x2c>;
