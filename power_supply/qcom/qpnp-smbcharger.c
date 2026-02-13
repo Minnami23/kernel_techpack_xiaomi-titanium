@@ -443,13 +443,21 @@ module_param_named(
 	int, 00600
 );
 
+#if defined(CONFIG_MACH_XIAOMI_TIFFANY) || defined(CONFIG_MACH_XIAOMI_VINCE)
+static int smbchg_default_hvdcp_icl_ma = 2500;
+#else
 static int smbchg_default_hvdcp_icl_ma = 1800;
+#endif
 module_param_named(
 	default_hvdcp_icl_ma, smbchg_default_hvdcp_icl_ma,
 	int, 00600
 );
 
+#if defined(CONFIG_MACH_XIAOMI_TIFFANY) || defined(CONFIG_MACH_XIAOMI_VINCE)
+static int smbchg_default_hvdcp3_icl_ma = 2500;
+#else
 static int smbchg_default_hvdcp3_icl_ma = 3000;
+#endif
 module_param_named(
 	default_hvdcp3_icl_ma, smbchg_default_hvdcp3_icl_ma,
 	int, 00600
@@ -2624,6 +2632,10 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 	int prev_therm_lvl;
 	int thermal_icl_ma;
 
+#if defined(CONFIG_MACH_XIAOMI_TIFFANY) || defined(CONFIG_MACH_XIAOMI_VINCE)
+	unsigned int	hvdcp_thermal_mitigation[7] = {2500, 2500, 1500, 1000, 1000, 500, 0};
+#endif
+
 	if (!chip->thermal_mitigation) {
 		dev_err(chip->dev, "Thermal mitigation not supported\n");
 		return -EINVAL;
@@ -2677,8 +2689,17 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 			pr_err("Couldn't disable DC thermal ICL vote rc=%d\n",
 				rc);
 	} else {
+#if defined(CONFIG_MACH_XIAOMI_TIFFANY) || defined(CONFIG_MACH_XIAOMI_VINCE)
+		if (chip->usb_supply_type == POWER_SUPPLY_TYPE_USB_HVDCP || chip->usb_supply_type == POWER_SUPPLY_TYPE_USB_HVDCP_3){
+		thermal_icl_ma =
+			(int)hvdcp_thermal_mitigation[chip->therm_lvl_sel];
+		} else {
+#endif
 		thermal_icl_ma =
 			(int)chip->thermal_mitigation[chip->therm_lvl_sel];
+#if defined(CONFIG_MACH_XIAOMI_TIFFANY) || defined(CONFIG_MACH_XIAOMI_VINCE)
+		}
+#endif
 		rc = vote(chip->usb_icl_votable, THERMAL_ICL_VOTER, true,
 					thermal_icl_ma);
 		if (rc < 0)
@@ -6772,6 +6793,15 @@ static int smbchg_hw_init(struct smbchg_chip *chip)
 		}
 	}
 
+#if defined(CONFIG_MACH_XIAOMI_TIFFANY) || defined(CONFIG_MACH_XIAOMI_VINCE)
+	rc = smbchg_sec_masked_write(chip,
+			chip->usb_chgpth_base + USBIN_CHGR_CFG,
+			0xFF, 0x00);
+	if (rc < 0)
+		dev_err(chip->dev, "Couldn't set only 5v OVP 6.4V rc=%d\n",
+				rc);
+#endif
+
 	rc = smbchg_sec_masked_write(chip, chip->usb_chgpth_base + TR_RID_REG,
 			FG_INPUT_FET_DELAY_BIT, FG_INPUT_FET_DELAY_BIT);
 	if (rc < 0) {
@@ -7164,7 +7194,11 @@ do {									\
 } while (0)
 
 #define DEFAULT_VLED_MAX_UV		3500000
+#if defined(CONFIG_MACH_XIAOMI_TIFFANY) || defined(CONFIG_MACH_XIAOMI_VINCE)
+#define DEFAULT_FCC_MA			2500
+#else
 #define DEFAULT_FCC_MA			2000
+#endif
 #define DEFAULT_NUM_OF_PULSE_ALLOWED	20
 static int smb_parse_dt(struct smbchg_chip *chip)
 {
@@ -8010,9 +8044,9 @@ static int smbchg_probe(struct platform_device *pdev)
 		dev_err(chip->dev, "Error parsing DT peripherals: %d\n", rc);
 		goto votables_cleanup;
 	}
-
+#ifdef CONFIG_MACH_XIAOMI_YSL
 	chip->hvdcp_not_supported = true;
-
+#endif
 	rc = smbchg_check_chg_version(chip);
 	if (rc) {
 		pr_err("Unable to check schg version rc=%d\n", rc);
