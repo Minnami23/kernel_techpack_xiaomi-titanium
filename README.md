@@ -1,1 +1,0 @@
-# techpack_xiaomi-titanium
