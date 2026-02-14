@@ -60,9 +60,11 @@
 			status = "ok";
 			ibb_regulator: qcom,ibb@dc00 {
 				qcom,qpnp-ibb-limit-maximum-current = <200>;
+				qcom,qpnp-ibb-init-lcd-voltage = <5500000>;
 			};
 			lab_regulator: qcom,lab@de00 {
 				qcom,qpnp-lab-limit-maximum-current = <200>;
+				qcom,qpnp-lab-init-lcd-voltage = <5500000>;
 			};
 		};
 		wled: qcom,leds@d800 {
