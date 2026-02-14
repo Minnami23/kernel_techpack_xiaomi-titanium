@@ -1,3 +1,12 @@
+/{
+	mtp_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <15>;
+        	#include "../common/batterydata/batterydata-coslight-3000mah.dtsi"
+        	#include "../common/batterydata/batterydata-sunwoda-3000mah.dtsi"
+        	#include "../common/batterydata/batterydata-share-3000mah.dtsi"
+	};
+};
+
 &spmi_bus {
     qcom,pmi8940@2 {  
    		qpnp_smbcharger: qcom,qpnp-smbcharger {
