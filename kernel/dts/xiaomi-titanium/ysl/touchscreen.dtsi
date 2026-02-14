@@ -56,7 +56,7 @@
 	};
 
 	focaltech@38{
-		compatible = "focaltech,fts";
+		compatible = "focaltech,fts_ts-mi8953";
 		reg = <0x38>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <65 0x2>;
