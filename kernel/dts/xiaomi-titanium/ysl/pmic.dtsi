@@ -29,6 +29,10 @@
 	};
 };
 
+&pm8937_vadc {
+	/delete-node/ chan@13;
+};
+
 &spmi_bus {
 	qcom,pmi8940@3 {
 		labibb: qpnp-labibb-regulator {
