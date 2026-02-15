@@ -47,3 +47,10 @@
 	qcom,warm-bat-decidegc = <450>;
     status = "okay";
 };
+
+&usb3 {
+	qcom,usbin-vadc = <&pmi8950_vadc>;
+	qcom,detect-dpdm-floating;
+	vbus_dwc3-supply = <&smbcharger_charger_otg>;
+	extcon = <&qpnp_smbcharger>;
+};
