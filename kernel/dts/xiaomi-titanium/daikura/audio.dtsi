@@ -38,3 +38,31 @@
 	/delete-property/qcom,msm-vdd-wsa-switch-voltage;
 	/delete-property/qcom,msm-vdd-wsa-switch-current;
 };
+
+&ext_codec {
+	status = "disabled";
+};
+
+&slim_msm {
+	status = "disabled";
+};
+
+&dai_slim {
+	status = "disabled";
+};
+
+&wcd9xxx_intc {
+	status = "disabled";
+};
+
+&clock_audio {
+	status = "disabled";
+};
+
+&wcd9335 {
+	status = "disabled";
+};
+
+&wcd_rst_gpio {
+	status = "disabled";
+};
