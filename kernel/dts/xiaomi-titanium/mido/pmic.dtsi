@@ -62,3 +62,7 @@
 		};
 	};
 };
+
+&wled {
+	/delete-property/ qcom,en-ext-pfet-sc-pro;
+};
