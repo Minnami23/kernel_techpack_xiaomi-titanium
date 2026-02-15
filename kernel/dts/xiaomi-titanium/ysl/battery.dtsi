@@ -13,25 +13,21 @@
 	qcom,iterm-ma = <200>;
 	qcom,float-voltage-mv = <4400>;
 	qcom,resume-delta-mv = <50>;
-	dpdm-supply = <&qusb_phy>;
-	qcom,hvdcp-disable;
-	qcom,micro-usb;
-	/delete-property/qcom,chg-inhibit-en;
-	/delete-property/ qcom,external-typec;
-    /delete-property/ qcom,typec-psy-name;
 	qcom,thermal-mitigation = <2000 1000 800 500 200 0>;
+	qcom,float-voltage-comp = <0x10>; /*add comp to 4.1v*/
+	dpdm-supply = <&qusb_phy>;
+	/delete-property/ qcom,external-typec;
+	/delete-property/ qcom,typec-psy-name;
+	/delete-property/ qcom,autoadjust-vfloat;
 	qcom,fastchg-current-ma = <2000>;
 	qcom,dc-psy-type = "Mains";
 	qcom,dc-psy-ma = <2000>;
 	qcom,low-volt-dcin;
 	qcom,bmd-pin-src = "bpd_thm_id";
 	qcom,charge-unknown-battery;
-	qcom,jeita-temp-hard-limit = <1>;
-	/delete-property/qcom,fastchg-current-comp;
-	qcom,cool-xiaomi-bat-decidegc = <50>;
 	qcom,battery-data = <&mtp_batterydata>;
-	qcom,chg-led-sw-controls;
-	qcom,chg-led-support;
+	/delete-property/ qcom,chg-led-sw-controls;
+	/delete-property/ qcom,chg-led-support;
 	status = "okay";
 };
 
@@ -41,20 +37,15 @@
 	qcom,resume-soc = <99>;
 	qcom,resume-soc-raw = <254>;
 	qcom,hold-soc-while-full;
-	qcom,fg-delta-soc = <1>;//fg soc update frequency
+	qcom,fg-delta-soc = <1>; //fg soc update frequency
 	qcom,fg-iterm-ma = <400>;
-	qcom,fg-chg-iterm-ma = <200>;/*default 100ma*/
+	qcom,fg-chg-iterm-ma = <200>; /*default 100ma*/
 	qcom,fg-cutoff-voltage-mv = <3400>;
-	qcom,battery-data = <&mtp_batterydata>;
 	qcom,fg-cc-cv-threshold-mv = <4390>;
 	qcom,vbat-estimate-diff-mv = <150>;
-	qcom,thermal-coefficients = [C8 86 C1 50 D3 37];/*R=10K B25/85 = 3435*/
-	qcom,cold-hot-jeita-hysteresis = <10 20>;//jeita recharger
-	/delete-property/qcom,capacity-learning-on;
-	qcom,hot-bat-decidegc = <600>;
-	qcom,warm-bat-decidegc = <450>;
-	qcom,cool-bat-decidegc = <150>;
-	qcom,cold-bat-decidegc = <0>;
+	qcom,thermal-coefficients = [C8 86 C1 50 D3 37];
+	/delete-property/ qcom,capacity-learning-on;
+	qcom,battery-data = <&mtp_batterydata>;
 	status = "okay";
 };
 
