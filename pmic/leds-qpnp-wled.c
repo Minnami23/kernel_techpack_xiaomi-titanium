@@ -442,8 +442,9 @@ static int qpnp_wled_step_delay_gain = 2;
 module_param_named(
 	step_delay_gain, qpnp_wled_step_delay_gain, int, 0600
 );
-
+#if (defined CONFIG_MACH_XIAOMI_YSL) || (defined CONFIG_MACH_XIAOMI_SAKURA) || (defined CONFIG_MACH_XIAOMI_DAISY) || (defined CONFIG_MACH_XIAOMI_VINCE)
 static int first_set_prev_state = 0;
+#endif
 
 /* helper to read a pmic register */
 static int qpnp_wled_read_reg(struct qpnp_wled *wled, u16 addr, u8 *data)
@@ -1145,11 +1146,12 @@ static void qpnp_wled_work(struct work_struct *work)
 			goto unlock_mutex;
 		}
 	}
-
+#if (defined CONFIG_MACH_XIAOMI_YSL) || (defined CONFIG_MACH_XIAOMI_SAKURA) || (defined CONFIG_MACH_XIAOMI_DAISY) || (defined CONFIG_MACH_XIAOMI_VINCE)
 	if (1 == first_set_prev_state) {
 		wled->prev_state = true;
 		first_set_prev_state = 0;
 	}
+#endif
 
 	if (!!level != wled->prev_state) {
 		if (!!level) {
@@ -2765,12 +2767,13 @@ static int qpnp_wled_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "wled config failed\n");
 		return rc;
 	}
-
+#if (defined CONFIG_MACH_XIAOMI_YSL) || (defined CONFIG_MACH_XIAOMI_SAKURA) || (defined CONFIG_MACH_XIAOMI_DAISY) || (defined CONFIG_MACH_XIAOMI_VINCE)
 	if (strnstr(saved_command_line, "androidboot.mode=ffbm-01",
 		    strlen(saved_command_line))) {
 		printk("linson in ffbm mode\n");
 		first_set_prev_state = 1;
 	}
+#endif
 
 	INIT_WORK(&wled->work, qpnp_wled_work);
 	wled->ramp_ms = QPNP_WLED_RAMP_DLY_MS;
