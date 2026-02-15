@@ -1,4 +1,5 @@
 #include "android.dtsi"
 #include "display.dtsi"
 #include "touchscreen.dtsi"
+#include "camera.dtsi"
 #include "battery.dtsi"
