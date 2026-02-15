@@ -5,4 +5,5 @@
 #include "audio.dtsi"
 #include "misc.dtsi"
 #include "pinctrl.dtsi"
+#include "fingerprint.dtsi"
 #include "battery.dtsi"
