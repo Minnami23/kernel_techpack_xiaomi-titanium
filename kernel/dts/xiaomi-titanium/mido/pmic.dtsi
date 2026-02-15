@@ -63,6 +63,19 @@
 	};
 };
 
+&pmi8950_pwm {
+	status = "okay";
+};
+
 &wled {
 	/delete-property/ qcom,en-ext-pfet-sc-pro;
+};
+
+&soc {
+	pwm_ir {
+    	compatible = "pwm-ir";
+        pwms = <&pmi8950_pwm 0 0>;
+        reg-id = "vdd";
+        vdd-supply = <&pm8953_l8>;
+    };
 };
