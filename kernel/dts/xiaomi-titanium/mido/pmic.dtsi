@@ -19,5 +19,6 @@
 				qcom,s2-type = <7>;
 			};
 		};
+		/delete-node/ qcom,pm8953_typec@bf00;
 	};
 };
