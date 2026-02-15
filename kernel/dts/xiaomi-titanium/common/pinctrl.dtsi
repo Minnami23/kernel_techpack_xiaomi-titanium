@@ -121,63 +121,59 @@
 };
 
 &soc {
-    tlmm: pinctrl@1000000 {
-        ts_init_pins: ts_init_pins {
-            ts_int_init_label: ts_int_init {
-                mux {
-                    pins = "gpio65";
-                    function = "gpio";
-                };
-                config {
-                    pins = "gpio65";
-                    drive-strength = <8>;
-                    input;
-                    bias-pull-up;
-                    output-low;
-                };
-            };
+	tlmm: pinctrl@1000000 {
+        pmx_ts_int_suspend {
+			ts_int_suspend: ts_int_suspend {
+				mux {
+					pins = "gpio65";
+					function = "gpio";
+				};
 
-            ts_reset_init_label: ts_reset_init {
-                mux {
-                    pins = "gpio64";
-                    function = "gpio";
-                };
-                config {
-                    pins = "gpio64";
-                    drive-strength = <8>;
-                    bias-pull-up;
-                    output-low;
-                };
-            };
-        };
+				config {
+					pins = "gpio65";
+					drive-strength = <8>;
+					bias-pull-down;
+					output-low;
+				};
+			};
+			synaptic_int_suspend: synaptic_int_suspend {
+				mux {
+					pins = "gpio65";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio65";
+					drive-strength = <2>;
+					bias-pull-up;
+				};
+			};
+		};
 
-        ts_suspend_pins: ts_suspend_pins {
-            ts_int_suspend_label: ts_int_suspend {
-                mux {
-                    pins = "gpio65";
-                    function = "gpio";
-                };
-                config {
-                    pins = "gpio65";
-                    drive-strength = <2>;
-                    input;
-                    bias-pull-down;
-                    output-low;
-                };
-            };
+		pmx_ts_reset_suspend {
+			ts_reset_suspend: ts_reset_suspend {
+				mux {
+					pins = "gpio64";
+					function = "gpio";
+				};
 
-            ts_reset_suspend_label: ts_reset_suspend {
-                mux {
-                    pins = "gpio64";
-                    function = "gpio";
-                };
-                config {
-                    pins = "gpio64";
-                    drive-strength = <2>;
-                    bias-pull-down;
-                    output-low;
-                };
-            };
-        };
+				config {
+					pins = "gpio64";
+					drive-strength = <8>;
+					bias-pull-down;
+					 output-low;
+				};
+			};
+			synaptic_reset_suspend: synaptic_reset_suspend {
+				mux {
+					pins = "gpio64";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio64";
+					drive-strength = <2>;
+					bias-pull-up;
+				};
+			};
+		};
     };
 };
