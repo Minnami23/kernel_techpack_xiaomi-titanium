@@ -67,6 +67,10 @@ static int parse_dt(struct device *dev, struct synaptics_dsx_board_data *bdata)
 	bdata->irq_gpio = of_get_named_gpio_flags(np,
 			"synaptics,irq-gpio", 0,
 			(enum of_gpio_flags *)&bdata->irq_flags);
+	bdata->reset_gpio = of_get_named_gpio_flags(np,
+			"synaptics,rst-gpio", 0,
+			NULL);
+	printk("reset gpio : %d\n", bdata->reset_gpio);
 	retval = of_property_read_u32(np, "synaptics,irq-on-state",
 			&value);
 	if (retval < 0)
