@@ -1,4 +1,4 @@
-#include "../common/panel/dsi-panel-otm1911-fhd-video.dtsi"
+#include "panel/dsi-panel-otm1911-fhd-video.dtsi"
 #include "../common/panel/dsi-panel-otm1911-fhdplus-video.dtsi"
 #include "../common/panel/dsi-panel-ili7807-fhdplus-video.dtsi"
 #include "../common/panel/dsi-panel-hx8399c-fhdplus-video.dtsi"
