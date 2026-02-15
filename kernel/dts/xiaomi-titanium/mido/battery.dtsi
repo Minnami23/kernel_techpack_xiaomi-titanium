@@ -9,3 +9,41 @@
 	};
 
 };
+
+&qpnp_smbcharger {
+	compatible = "qcom,qpnp-smbcharger-mi8953";
+
+    qcom,float-voltage-mv = <4400>;
+	qcom,resume-delta-mv = <50>;
+	qcom,charge-unknown-battery;
+	qcom,override-usb-current;
+	qcom,fastchg-current-comp = <1200>;
+	qcom,float-voltage-comp = <16>;
+	/delete-property/ qcom,autoadjust-vfloat;
+    qcom,thermal-mitigation = <3000 2500 2000 2000 1000 500 0>;
+    qcom,battery-data = <&qrd_batterydata>;
+	/delete-property/ qcom,parallel-usb-min-current-ma;
+	/delete-property/ qcom,parallel-usb-9v-min-current-ma;
+	/delete-property/ qcom,parallel-allowed-lowering-ma;
+	/delete-property/ qcom,chg-led-sw-controls;
+	/delete-property/ qcom,chg-led-support;
+	/delete-property/ qcom,external-typec;
+	/delete-property/ qcom,typec-psy-name;
+    status = "okay";
+};
+
+&qpnp_fg {
+	compatible = "qcom,qpnp-fg-mi8953";
+
+    qcom,resume-soc = <99>;
+	qcom,fg-cutoff-voltage-mv = <3400>;
+	qcom,fg-cc-cv-threshold-mv = <4380>;
+	qcom,fg-vbat-estimate-diff-mv = <200>;
+	qcom,fg-restore-batt-info;
+    qcom,battery-data = <&qrd_batterydata>;
+    qcom,thermal-coefficients = [c8 86 c1 50 d3 37];
+	qcom,cold-bat-decidegc = <0>;
+	qcom,cool-bat-decidegc = <150>;
+	qcom,warm-bat-decidegc = <450>;
+    status = "okay";
+};
