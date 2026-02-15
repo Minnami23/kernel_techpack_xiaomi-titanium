@@ -2,4 +2,5 @@
 #include "display.dtsi"
 #include "touchscreen.dtsi"
 #include "camera.dtsi"
+#include "audio.dtsi"
 #include "battery.dtsi"
