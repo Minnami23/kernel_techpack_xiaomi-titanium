@@ -20,12 +20,6 @@
 				qcom,use-bark;
 			};
 		};
-		pm8953_gpios: gpios {
-			gpio@c700 {
-				qcom,mode = <0>;
-				status = "ok";
-			};
-		};
 	};
 };
 

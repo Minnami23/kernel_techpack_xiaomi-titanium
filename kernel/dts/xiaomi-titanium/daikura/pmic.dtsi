@@ -20,12 +20,6 @@
 				qcom,use-bark;
 			};
 		};
-		pm8953_gpios: gpios {
-			gpio@c700 {
-				/delete-property/ status;
-				qcom,master-en = <0>;
-			};
-		};
 		/delete-node/ qcom,pm8953_typec@bf00;
 	};
 };
