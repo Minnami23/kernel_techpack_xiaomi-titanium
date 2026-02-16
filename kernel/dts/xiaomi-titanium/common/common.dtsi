@@ -1,8 +1,6 @@
 #include "android.dtsi"
 #include "soc.dtsi"
 #include "cpu.dtsi"
-#include "sdhc.dtsi"
-#include "spi.dtsi"
 #include "pinctrl.dtsi"
 #include "audio.dtsi"
 #include "haptic.dtsi"

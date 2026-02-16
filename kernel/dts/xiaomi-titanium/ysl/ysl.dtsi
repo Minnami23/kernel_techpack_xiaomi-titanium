@@ -1,3 +1,5 @@
+#include "../common/sdhc.dtsi"
+#include "../common/spi.dtsi"
 #include "android.dtsi"
 #include "pinctrl.dtsi"
 #include "ysl-pinctrl.dtsi"
