@@ -4,7 +4,7 @@
 			compatible = "focaltech,5435";
 			reg = <0x38>;
 			interrupt-parent = <&tlmm>;
-			interrupts = <65 0x2>;
+			interrupts = <65 IRQ_TYPE_LEVEL_HIGH>;
 			vdd-supply = <&pm8953_l10>;
 			vcc_i2c-supply = <&pm8953_l6>;
 			/* pins used by touchscreen */
@@ -44,7 +44,7 @@
 			compatible = "imagis,ist30xx-ts";
 			reg = <0x50>;
 			interrupt-parent = <&tlmm>;
-			interrupts = <65 0x2>;
+			interrupts = <65 IRQ_TYPE_LEVEL_HIGH>;
 			vdd-supply = <&pm8953_l10>;
 			vcc_i2c-supply = <&pm8953_l6>;
 			/* pins used by touchscreen */
@@ -62,7 +62,7 @@
 			compatible = "goodix,gt9xx";
 			reg = <0x14>;
 			interrupt-parent = <&tlmm>;
-			interrupts = <65 0x0>;
+			interrupts = <65 IRQ_TYPE_LEVEL_HIGH>;
 			pinctrl-names = "pmx_ts_active","pmx_ts_suspend",
 					"pmx_ts_release";
 			pinctrl-0 = <&ts_int_active &ts_reset_active>;
