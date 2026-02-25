@@ -1,4 +1,7 @@
 &int_codec {
+	status = "ok";
+	/* already defined in msm8953-audio.dtsi */
+	qcom,msm-hs-micbias-type = "internal";
 	qcom,msm-spk-ext-pa = <&tlmm 96 0>;
 	qcom,audio-routing =
 		"RX_BIAS", "MCLK",
@@ -10,35 +13,7 @@
 		"AMIC1", "MIC BIAS External",
 		"AMIC2", "MIC BIAS Internal2",
 		"AMIC3", "MIC BIAS External";
-	/delete-property/ msm-vdd-wsa-switch-supply;
-	/delete-property/ qcom,msm-vdd-wsa-switch-voltage;
-	/delete-property/ qcom,msm-vdd-wsa-switch-current;
-};
-
-&ext_codec {
-	status = "disabled";
-};
-
-&slim_msm {
-	status = "disabled";
-};
-
-&dai_slim {
-	status = "disabled";
-};
-
-&clock_audio {
-	status = "disabled";
-};
-
-&wcd9335 {
-	status = "disabled";
-};
-
-&wcd_rst_gpio {
-	status = "disabled";
-};
-
-&wcd9xxx_intc {
-	status = "disabled";
+	/delete-property/msm-vdd-wsa-switch-supply;
+	/delete-property/qcom,msm-vdd-wsa-switch-voltage;
+	/delete-property/qcom,msm-vdd-wsa-switch-current;
 };
