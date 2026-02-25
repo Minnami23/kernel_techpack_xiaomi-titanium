@@ -24,9 +24,9 @@
 			focaltech,num-max-touches = <10>;
 			focaltech,have-key;
 			focaltech,key-number = <3>;
-			focaltech,keys = <139 172 158>;
+			focaltech,keys = <172 139 158>;
 			focaltech,key-y-coord = <2040>;
-			focaltech,key-x-coords = <200 500 800>;
+			focaltech,key-x-coords = <500 200 800>;
 		};
 
 		imagis@50 {
