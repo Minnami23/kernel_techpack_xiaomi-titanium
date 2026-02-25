@@ -1,4 +1,7 @@
-/* msm8953-audio */
+/ {
+	qcom,enable-legacy-adsp-hacks;
+};
+
 &int_codec {
     qcom,msm-mbhc-hphl-swh = <1>;
 	qcom,msm-mbhc-gnd-swh = <1>;
