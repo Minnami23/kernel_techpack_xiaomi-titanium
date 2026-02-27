@@ -33,7 +33,6 @@
 #define FOCALTECH_FAE_MOD
 
 #define USB_CHARGE_DETECT
-#define FOCALTECH_ITO_TEST			1
 #define FOCALTECH_MAX_VKEY_NUM 3
 
 struct fw_upgrade_info {
