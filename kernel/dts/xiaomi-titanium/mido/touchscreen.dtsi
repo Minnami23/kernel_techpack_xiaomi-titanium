@@ -4,7 +4,7 @@
 			compatible = "focaltech,fts_ts-mi8953";
 			focaltech,ic-type = <0x54350402>; // _FT5435
 			focaltech,key-dim = <50>;
-			focaltech,key-y-coords = <2040 2040 2040>;
+			focaltech,key-y-coords = <1350 1350 1350>;
 			reg = <0x38>;
 			interrupt-parent = <&tlmm>;
 			interrupts = <65 0x2008>;
@@ -25,8 +25,8 @@
 			focaltech,have-key;
 			focaltech,key-number = <3>;
 			focaltech,keys = <139 172 158>;
-			focaltech,key-y-coord = <2040>;
-			focaltech,key-x-coords = <200 500 800>;
+			focaltech,key-y-coord = <1350>;
+			focaltech,key-x-coords = <180 350 540>;
 		};
 
 		imagis@50 {
