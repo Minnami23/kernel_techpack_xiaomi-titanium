@@ -1,0 +1,1 @@
+obj-$(CONFIG_TOUCHSCREEN_FT5435_MI) += ft5435_ts.o
