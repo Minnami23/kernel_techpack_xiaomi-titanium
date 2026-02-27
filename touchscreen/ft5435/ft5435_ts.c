@@ -307,10 +307,6 @@ struct ft5435_ts_data {
 	struct pinctrl_state *gpio_state_active;
 	struct pinctrl_state *gpio_state_suspend;
 
-#if defined(FOCALTECH_TP_GLOVE)
-	u8 glove_id;
-#endif
-
 #if defined(USB_CHARGE_DETECT)
 struct work_struct	work;
 u8 charger_in;
@@ -475,93 +471,6 @@ static int ft5435_i2c_write(struct i2c_client *client, char *writebuf,
 		dev_err(&client->dev, "%s: i2c write error.\n", __func__);
 	return ret;
 }
-
-#if defined(FOCALTECH_TP_GLOVE)
-
-#define FOCALTECH_TP_GLOVE_SET    0xc0
-#define FOCALTECH_TP_GLOVE_ENABLE 0x01
-
-static struct device *tp_glove_dev;
-
-/*
-	u8 glove_id; 0: close glove function, 1: open glove function
-*/
-static ssize_t tp_glove_id_show(struct device *dev,
-				struct device_attribute *attr, char *buf)
-{
-	struct ft5435_ts_data *data = NULL;
-	int ret;
-
-	data = dev_get_drvdata(dev);
-
-	ret = snprintf(buf, 50, "glove_id show:%d\n", data->glove_id);
-
-	return ret;
-}
-
-static ssize_t tp_glove_id_store(struct device *dev,
-				struct device_attribute *attr,
-				const char *buf, size_t size)
-{
-	struct ft5435_ts_data *data = NULL;
-	unsigned long val = 0;
-	char val_read = 0;
-	ssize_t ret = -EINVAL;
-	char txbuf[2];
-	txbuf[0] = FOCALTECH_TP_GLOVE_SET;
-
-
-	data = dev_get_drvdata(dev);
-
-	if (data->suspended)
-		return ret;
-
-	ret = kstrtoul(buf, 10, &val);
-	if (ret)
-		return ret;
-
-
-	if (0 == val) {
-		data->glove_id = 0x00;
-		txbuf[1] = 0x00;
-		ft5435_i2c_write(data->client, txbuf, sizeof(txbuf));
-	} else
-	if (1 == val) {
-		data->glove_id = 0x01;
-		txbuf[1] = FOCALTECH_TP_GLOVE_ENABLE;
-		ft5435_i2c_write(data->client, txbuf, sizeof(txbuf));
-	} else {
-		pr_err("invalid  command! \n");
-		return -EPERM;
-	}
-	printk("set glove_id = %d \n", data->glove_id);
-	ft5435_i2c_read(data->client, &txbuf[0], 1, &val_read, 1);
-	printk("read glove_id = %d\n", val_read);
-
-	return size;
-}
-static DEVICE_ATTR(glove_enable, 0644, tp_glove_id_show, tp_glove_id_store);
-
-void tp_glove_register (struct ft5435_ts_data *data)
-{
-	int rc = 0;
-
-	tp_glove_dev = device_create(tp_device_class, NULL, 0, NULL, "tp_glove");
-	if (IS_ERR(tp_glove_dev))
-		pr_err("Failed to create device(glove_ctrl)!\n");
-
-
-	rc = device_create_file(tp_glove_dev, &dev_attr_glove_enable);
-	if (rc < 0)
-		pr_err("Failed to create device file(%s)!\n", dev_attr_glove_enable.attr.name);
-	dev_set_drvdata(tp_glove_dev, data);
-
-	printk("~~~~~ %s enable!!!!!\n", __func__);
-
-}
-#endif
-
-
 
 static int ft5x0x_write_reg(struct i2c_client *client, u8 addr, const u8 val)
 {
@@ -4039,11 +3948,6 @@ INIT_WORK(&data->work_vr, ft5435_change_vr_switch);
 firm_ver_attr_create();
 #endif
 /* [PLATFORM]-Mod-END by TCTNB.ZXZ*/
-
-#ifdef FOCALTECH_TP_GLOVE
-	tp_glove_register(data);
-#endif
-
 
 g_ft5435_ts_data = data;
 
