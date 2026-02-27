@@ -50,6 +50,7 @@
 #if defined(FOCALTECH_AUTO_UPGRADE)
 #define FTS_VENDOR_1	0x3b
 #define FTS_VENDOR_2	0x51
+
 static unsigned char firmware_data_vendor1[] = {
 	#include "HQ_AL1512_C6_FT5435_Biel0x3b_Ver0a_20170119_app.i"
 };
@@ -2302,7 +2303,6 @@ static int ft5435_fw_upgrade(struct device *dev, bool force)
 				data->fw_ver[1], data->fw_ver[2]);
 	printk("[Fu]New firmware: %d.%d.%d", fw_file_maj,
 				fw_file_min, fw_file_sub_min);
-
 	if (force)
 		fw_upgrade = true;
 
@@ -3724,27 +3724,19 @@ static const struct attribute_group ft5435_ts_attr_group = {
 
 static int ft5435_proc_init(struct kernfs_node *sysfs_node_parent)
 {
-       int len, ret = 0;
+       int ret = 0;
        char *buf;
        char *key_disabler_sysfs_node, *double_tap_sysfs_node;
        struct proc_dir_entry *proc_entry_tp = NULL;
        struct proc_dir_entry *proc_symlink_tmp = NULL;
-
        buf = kzalloc(PATH_MAX, GFP_KERNEL);
-       if (buf) {
-               len = kernfs_path_from_node(sysfs_node_parent, NULL, buf, PATH_MAX);
-               if (unlikely(len >= PATH_MAX)) {
-                          pr_err("%s: Buffer too long: %d\n", __func__, len);
-                          ret = -ERANGE;
-                          goto exit;
-               }
-       }
+       if (buf)
+               kernfs_path(sysfs_node_parent, buf, PATH_MAX);
 
        proc_entry_tp = proc_mkdir("touchpanel", NULL);
        if (proc_entry_tp == NULL) {
                pr_err("%s: Couldn't create touchpanel dir in procfs\n", __func__);
                ret = -ENOMEM;
-               goto exit;
        }
 
        key_disabler_sysfs_node = kzalloc(PATH_MAX, GFP_KERNEL);
@@ -3755,7 +3747,6 @@ static int ft5435_proc_init(struct kernfs_node *sysfs_node_parent)
        if (proc_symlink_tmp == NULL) {
                pr_err("%s: Couldn't create capacitive_keys_enable symlink\n", __func__);
                ret = -ENOMEM;
-               goto exit;
        }
 
        double_tap_sysfs_node = kzalloc(PATH_MAX, GFP_KERNEL);
@@ -3764,19 +3755,15 @@ static int ft5435_proc_init(struct kernfs_node *sysfs_node_parent)
        proc_symlink_tmp = proc_symlink("enable_dt2w",
                proc_entry_tp, double_tap_sysfs_node);
        if (proc_symlink_tmp == NULL) {
-               pr_err("%s: Couldn't create double_tap_enable symlink\n", __func__);
                ret = -ENOMEM;
-               goto exit;
+               pr_err("%s: Couldn't create double_tap_enable symlink\n", __func__);
        }
 
-exit:
        kfree(buf);
        kfree(key_disabler_sysfs_node);
        kfree(double_tap_sysfs_node);
        return ret;
 }
-
-static char tp_info_summary[80] = "";
 
 static int ft5435_ts_probe(struct i2c_client *client,
 			const struct i2c_device_id *id)
@@ -3791,7 +3778,6 @@ static int ft5435_ts_probe(struct i2c_client *client,
 	u8 w_buf[FT_MAX_WR_BUF] = {0};
 	int i;
 	int retry = 3;
-	char tp_temp_info[80];
 	printk("~~~~~ ft5435_ts_probe start\n");
 
 #if defined(CONFIG_FB)
@@ -3984,7 +3970,7 @@ INIT_WORK(&data->work_vr, ft5435_change_vr_switch);
 	while (retry--) {
 		err = ft5435_i2c_read(client, &reg_addr, 1, &reg_value, 1);
 		if (!(err < 0)) {
-#ifdef CONFIG_MACH_XIAOMI_C6
+#ifdef CONFIG_MACH_XIAOMI_MIDO
 			set_usb_charge_mode_par = 2;
 #endif
 			dev_info(&client->dev, "Device ID = 0x%x\n", reg_value);
@@ -4242,16 +4228,6 @@ g_ft5435_ts_data = data;
 	ft5435_i2c_write(client, w_buf, 1);
 	init_ok = 1;
 	ft5436_wakelock = wakeup_source_register(NULL, "ft5436");
-	if (fts_fw_vendor_id == FTS_VENDOR_1) {
-		strcpy(tp_info_summary, "[Vendor]Biel, [IC]FT5435, [FW]Ver");
-	} else if (fts_fw_vendor_id == FTS_VENDOR_2) {
-		strcpy(tp_info_summary, "[Vendor]Ofilm, [IC]FT5435, [FW]Ver");
-	} else{
-		strcpy(tp_info_summary, "[Vendor]Unknown, [IC]FT5435, [FW]Ver");
-	}
-	sprintf(tp_temp_info, "%d", data->fw_ver[0]);
-	strcat(tp_info_summary, tp_temp_info);
-	strcat(tp_info_summary, "\0");
 	printk("~~~~~ ft5435_ts_probe end\n");
 	return 0;
 
