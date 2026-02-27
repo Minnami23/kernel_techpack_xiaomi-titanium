@@ -323,42 +323,6 @@ static int ft5435_i2c_read(struct i2c_client *client, char *writebuf,
 			   int writelen, char *readbuf, int readlen);
 static int ft5x0x_read_reg(struct i2c_client *client, u8 addr, u8 *val);
 
-#ifdef CONFIG_TOUCHPANEL_PROXIMITY_SENSOR
-struct virtualpsensor {
-	char const *name;
-	struct input_dev *proximity_dev;
-	int proximity_function;
-	int vps_enabled;
-	struct sensors_classdev vps_cdev;
-	int value;
-};
-
-struct virtualpsensor *vps_ft5436;
-
-#define VPS_NAME "virtual-proximity"
-
-struct sensors_classdev virtual_sensors_proximity_cdev2 = {
-		.name = VPS_NAME,
-		.vendor = "NULL",
-		.version = 1,
-		.handle = SENSORS_PROXIMITY_HANDLE,
-		.type = SENSOR_TYPE_PROXIMITY,
-		.max_range = "5",
-		.resolution = "5.0",
-		.sensor_power = "3",
-		.min_delay = 0, /* in microseconds */
-		.fifo_reserved_event_count = 0,
-		.fifo_max_event_count = 0,
-		.enabled = 0,
-		.delay_msec = 100,
-		.sensors_enable = NULL,
-		.sensors_poll_delay = NULL,
-};
-
-static int vps_set_enable(struct sensors_classdev *sensors_cdev, unsigned int enable);
-
-static void tp_prox_sensor_enable(struct i2c_client *client, int enable);
-#endif
 static int ft5435_i2c_write(struct i2c_client *client, char *writebuf, int writelen);
 static struct workqueue_struct *ft5435_wq_cover;
 static struct workqueue_struct *ft5435_wq;
@@ -479,167 +443,7 @@ static int ft5x0x_read_reg(struct i2c_client *client, u8 addr, u8 *val)
 {
 	return ft5435_i2c_read(client, &addr, 1, val, 1);
 }
-#ifdef CONFIG_TOUCHPANEL_PROXIMITY_SENSOR
-int virtual_psensor_input_register2(struct i2c_client *pClient)
-{
-	s32 nRetVal = 0;
 
-	pr_err("*** %s() ***\n", __func__);
-
-	vps_ft5436->proximity_dev = input_allocate_device();
-	if (vps_ft5436->proximity_dev == NULL) {
-		pr_err("*** input device allocation failed ***\n");
-		return -ENOMEM;
-	}
-
-	vps_ft5436->proximity_dev->name = "proximity";
-	vps_ft5436->proximity_dev->id.bustype = BUS_I2C;
-
-	/* set the supported event type for input device */
-	set_bit(EV_ABS, vps_ft5436->proximity_dev->evbit);
-	set_bit(ABS_DISTANCE, vps_ft5436->proximity_dev->absbit);
-	input_set_abs_params(vps_ft5436->proximity_dev, ABS_DISTANCE, 0, 1, 0, 0);
-
-	nRetVal = input_register_device(vps_ft5436->proximity_dev);
-	if (nRetVal < 0) {
-		pr_err("*** Unable to register virtual P-sensor input device ***\n");
-		return nRetVal;
-	}
-
-	vps_ft5436->vps_cdev = virtual_sensors_proximity_cdev2;
-	vps_ft5436->vps_cdev.sensors_enable = vps_set_enable;
-	vps_ft5436->vps_cdev.sensors_poll_delay = NULL;
-
-	nRetVal = sensors_classdev_register(&pClient->dev, &vps_ft5436->vps_cdev);
-	if (nRetVal) {
-		pr_err("%s: Unable to register to sensors class: %d\n", __func__, nRetVal);
-	return nRetVal;
-	}
-
-	return 0;
-}
-static void tp_prox_sensor_enable(struct i2c_client *client, int enable)
-{
-	u8 state;
-	int ret = -1;
-
-	if (client == NULL)
-		return;
-
-	if (gpio_is_valid(g_ft5435_ts_data->pdata->reset_gpio)) {
-		gpio_set_value_cansleep(g_ft5435_ts_data->pdata->reset_gpio, 0);
-		printk("reset tp ~~~ \n");
-		msleep(g_ft5435_ts_data->pdata->hard_rst_dly);
-		gpio_set_value_cansleep(g_ft5435_ts_data->pdata->reset_gpio, 1);
-	}
-	msleep(g_ft5435_ts_data->pdata->soft_rst_dly);
-
-	if (enable) {
-		state = 0x01;
-	} else{
-		state = 0x00;
-	}
-	ret = ft5x0x_write_reg(client, 0xB0, state);
-	if (ret < 0)
-		printk("[proxi_5206]write psensor switch command failed\n");
-	ft5x0x_read_reg(client, 0xB0, &state);
-	printk(" proximity function status[0x%x]\n", state);
-	if ((!enable) && (g_ft5435_ts_data->suspended) && (g_ft5435_ts_data->gesture_id > 0)) {
-		printk("double click function enable again \n");
-		ft_tp_suspend(g_ft5435_ts_data);
-	}
-
-	return;
-}
-static int vps_set_enable(struct sensors_classdev *sensors_cdev, unsigned int enable)
-{
-	u8 status, reg_value;
-
-	printk("FT vps_set_enable in. enable[%d]\n", enable);
-	vps_ft5436->vps_enabled = enable ? 1 : 0;
-	if (enable == 1) {
-		ft5x0x_read_reg(g_ft5435_ts_data->client, 0xB0, &reg_value);
-		printk("FT proxi_fts 0xB0 state value is0x%02X\n", reg_value);
-		if (!(reg_value&0x01))
-			tp_prox_sensor_enable(g_ft5435_ts_data->client, 1);
-		ft5x0x_read_reg(g_ft5435_ts_data->client, 0x01, &status);
-		printk("FT 0x01 reg status[0x%x]\n", status);
-		if (status == 0xC0) {
-			input_report_abs(vps_ft5436->proximity_dev, ABS_DISTANCE, 0);
-			input_sync(vps_ft5436->proximity_dev);
-		} else if (status == 0xE0) {
-			input_report_abs(vps_ft5436->proximity_dev, ABS_DISTANCE, 1);
-			input_sync(vps_ft5436->proximity_dev);
-		}
-	}
-
-	return 0;
-}
-
-ssize_t ft_virtual_proximity_enable_show(struct device *pDevice, struct device_attribute *pAttr, char *pBuf)
-{
-	return sprintf(pBuf, "%d", vps_ft5436->vps_enabled);
-}
-ssize_t ft_virtual_proximity_enable_store(struct device *pDevice, struct device_attribute *pAttr, const char *pBuf, size_t nSize)
-{
-	int enable;
-	if (pBuf != NULL) {
-		sscanf(pBuf, "%d\n", &enable);
-		vps_set_enable(&vps_ft5436->vps_cdev, enable);
-		if (g_ft5435_ts_data->gesture_id == 0) {
-			if (enable)
-				device_init_wakeup(&g_ft5435_ts_data->client->dev, 1);
-			else
-				device_init_wakeup(&g_ft5435_ts_data->client->dev, 0);
-		}
-	}
-	return nSize;
-}
-
-static DEVICE_ATTR(enable, 0664, ft_virtual_proximity_enable_show, ft_virtual_proximity_enable_store);
-
-ssize_t ft_proximity_function_enable_show(struct device *pDevice, struct device_attribute *pAttr, char *pBuf)
-{
-	return sprintf(pBuf, "%x", vps_ft5436->proximity_function);
-}
-
-ssize_t ft_proximity_function_enable_store(struct device *pDevice, struct device_attribute *pAttr, const char *pBuf, size_t nSize)
-{
-	u32 nProximityMode;
-	if (pBuf != NULL) {
-		sscanf(pBuf, "%x", &nProximityMode);
-		printk("nProximityMode = 0x%x\n", nProximityMode);
-		vps_ft5436->proximity_function = nProximityMode;
-		tp_prox_sensor_enable(g_ft5435_ts_data->client, nProximityMode);
-	}
-	return nSize;
-}
-
-static DEVICE_ATTR(proximity, 0664, ft_proximity_function_enable_show, ft_proximity_function_enable_store);
-
-static int sys_device_create(void)
-{
-	struct class *virtual_proximity = NULL;
-	struct device *virtual_proximity_device = NULL;
-
-	virtual_proximity = class_create(THIS_MODULE, "virtual-proximity");
-	if (IS_ERR(virtual_proximity))
-		printk("Failed to create class(virtual_proximity)!\n");
-
-	virtual_proximity_device = device_create(virtual_proximity, NULL, 0, NULL, "device");
-	if (IS_ERR(virtual_proximity_device))
-		printk("Failed to create device(virtual_proximity_device)!\n");
-
-	if (device_create_file(virtual_proximity_device, &dev_attr_enable) < 0)
-		printk("Failed to create device file(%s)!\n", dev_attr_enable.attr.name);
-
-	if (device_create_file(virtual_proximity_device, &dev_attr_proximity) < 0)
-		printk("Failed to create device file(%s)!\n", dev_attr_enable.attr.name);
-
-	return 0;
-}
-
-#endif
 #if defined(LEATHER_COVER)
 void ft5435_enable_leather_cover(void)
 {
@@ -929,14 +733,14 @@ static irqreturn_t ft5435_ts_interrupt(int irq, void *dev_id)
 	u8 reg = 0x00, *buf;
 	bool update_input = false;
 
-	#ifdef CONFIG_TOUCHPANEL_PROXIMITY_SENSOR
+#ifdef CONFIG_TOUCHPANEL_PROXIMITY_SENSOR
 	u8 reg_value;
 	u8 proximity_status;
-	#endif
-	#ifdef FOCALTECH_TP_GESTURE
+#endif
+#ifdef FOCALTECH_TP_GESTURE
 	int ret = 0;
 	u8 state = 0;
-	#endif
+#endif
 
 	if (!data) {
 		pr_err("%s: Invalid data\n", __func__);
@@ -3702,18 +3506,6 @@ INIT_WORK(&data->work_cover, ft5435_change_leather_cover_switch);
 		}
 	}
 	data->family_id = pdata->family_id;
-
-
-#ifdef CONFIG_TOUCHPANEL_PROXIMITY_SENSOR
-	vps_ft5436 = kzalloc(sizeof(struct virtualpsensor), GFP_KERNEL);
-	if (!vps_ft5436) {
-		dev_err(&client->dev, "Not enough memory\n");
-		return -ENOMEM;
-	}
-	virtual_psensor_input_register2(client) ;
-	sys_device_create();
-#endif
-
 
 	mutex_init(&g_device_mutex);
 
