@@ -315,10 +315,6 @@ u8 charger_in;
 struct work_struct work_cover;
 u8 cover_on;
 #endif
-#if defined(VR_GLASS)
-struct work_struct work_vr;
-u8 vr_on;
-#endif
 };
 bool is_ft5435 = false;
 struct wakeup_source *ft5436_wakelock;
@@ -365,9 +361,6 @@ static void tp_prox_sensor_enable(struct i2c_client *client, int enable);
 #endif
 static int ft5435_i2c_write(struct i2c_client *client, char *writebuf, int writelen);
 static struct workqueue_struct *ft5435_wq_cover;
-#if defined(VR_GLASS)
-static struct workqueue_struct *ft5435_wq_vr;
-#endif
 static struct workqueue_struct *ft5435_wq;
 static struct ft5435_ts_data *g_ft5435_ts_data;
 
@@ -700,62 +693,6 @@ void ft5435_change_leather_cover_switch(struct work_struct *work)
 	if (cover_flag != data->cover_on) {
 		printk(KERN_ERR"[Fu]%s: Write %d to 0xc1\n", __FUNCTION__, data->cover_on);
 		ft5x0x_write_reg(ft_g_client, 0xc1, data->cover_on);
-	}
-}
-
-#endif
-#if defined(VR_GLASS)
-void ft5435_enable_vr(void)
-{
-	struct ft5435_ts_data *data;
-
-	if (!ft_g_client)
-		return ;
-	if (init_ok == 0)
-		return;
-	printk("[wxc]%s\n", __func__);
-	data = g_ft5435_ts_data;
-
-	data->vr_on = 1;
-
-	queue_work(ft5435_wq_vr, &data->work_vr);
-}
-EXPORT_SYMBOL(ft5435_enable_vr);
-void ft5435_disable_vr(void)
-{
-	struct ft5435_ts_data *data;
-
-	if (!ft_g_client)
-		return ;
-	if (init_ok == 0)
-		return;
-	printk("[wxc]%s\n", __func__);
-	data = g_ft5435_ts_data;
-
-	data->vr_on = 0;
-
-	queue_work(ft5435_wq_vr, &data->work_vr);
-}
-EXPORT_SYMBOL(ft5435_disable_vr);
-void ft5435_change_vr_switch(struct work_struct *work)
-{
-	u8 vr_flag = 0;
-	struct ft5435_ts_data *data;
-
-
-	data = g_ft5435_ts_data;
-
-	if (data->suspended) {
-		printk(KERN_ERR"data->suspended, data->vr_on = %d \n", data->vr_on);
-		return ;
-	}
-	if (ft_g_client == NULL)
-		return ;
-	ft5x0x_read_reg(ft_g_client, 0xc1, &vr_flag);
-	printk("[wxc]%s cover_flag=%d, data->vr_on=%d\n", __func__, vr_flag, data->vr_on);
-	if (vr_flag != data->vr_on) {
-		printk(KERN_ERR"[wxc]%s: Write %d to 0xc1\n", __FUNCTION__, data->vr_on);
-		ft5x0x_write_reg(ft_g_client, 0xc1, data->vr_on);
 	}
 }
 
@@ -1439,9 +1376,6 @@ static int ft5435_ts_resume(struct device *dev)
 
 #if defined(LEATHER_COVER)
 	queue_work(ft5435_wq_cover, &data->work_cover);
-#endif
-#if defined(VR_GLASS)
-	queue_work(ft5435_wq_vr, &data->work_vr);
 #endif
 	return 0;
 }
@@ -3660,9 +3594,6 @@ INIT_WORK(&data->work, ft5435_change_scanning_frq_switch);
 #if defined(LEATHER_COVER)
 INIT_WORK(&data->work_cover, ft5435_change_leather_cover_switch);
 #endif
-#if defined(VR_GLASS)
-INIT_WORK(&data->work_vr, ft5435_change_vr_switch);
-#endif
 
 #if defined(FOCALTECH_TP_GESTURE)
 	keyset_for_tp_gesture(input_dev);
@@ -4155,13 +4086,6 @@ static int __init ft5435_ts_init(void)
 		printk("Creat ft5435_wq_cover workqueue failed. \n");
 		return -ENOMEM;
 	}
-#if defined(VR_GLASS)
-	ft5435_wq_vr = create_singlethread_workqueue("ft5435_wq_vr");
-	if (!ft5435_wq_vr) {
-		printk("Creat ft5435_wq_vr workqueue failed. \n");
-		return -ENOMEM;
-	}
-#endif
 	return i2c_add_driver(&ft5435_ts_driver);
 }
 module_init(ft5435_ts_init);
